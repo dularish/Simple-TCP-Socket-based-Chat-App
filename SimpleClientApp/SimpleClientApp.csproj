@@ -49,5 +49,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SocketFrm\SocketFrm.csproj">
+      <Project>{6deacb7e-2855-4e43-a3e5-6d7186213ce4}</Project>
+      <Name>SocketFrm</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

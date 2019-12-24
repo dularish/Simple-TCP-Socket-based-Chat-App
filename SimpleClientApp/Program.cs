@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.IO;
 using System.Threading.Tasks;
+using SocketFrm;
 
 namespace SimpleClientApp
 {
@@ -17,16 +18,41 @@ namespace SimpleClientApp
 
             try
             {
-                NetworkStream networkStream = tcpClient.GetStream();
-                StreamWriter streamWriter = new StreamWriter(networkStream) { AutoFlush = true };
-                streamWriter.Write("Hello from client");
-                networkStream.Close();
+                //writeSimpleStringToStream(tcpClient);
+                writeSimpleCommandToStream(tcpClient);
             }
             finally
             {
                 tcpClient.Close();
             }
 
+        }
+
+        private static void writeSimpleCommandToStream(TcpClient tcpClient)
+        {
+            DisplayTextSocketCommand displayTextSocketCommand = new DisplayTextSocketCommand("Some simple string");
+
+            NetworkStream networkStream = tcpClient.GetStream();
+
+            byte[] dataBuffer = displayTextSocketCommand.Serialize(out int dataLength);
+
+            //byte[] writeBuffer = new byte[sizeof(int)];
+            //writeBuffer = BitConverter.GetBytes((int)dataLength);
+            //networkStream.Write(writeBuffer, 0, sizeof(int));
+            //networkStream.Flush();
+
+            networkStream.Write(dataBuffer, 0, dataLength);
+            networkStream.Flush();
+
+            networkStream.Close();
+        }
+
+        private static void writeSimpleStringToStream(TcpClient tcpClient)
+        {
+            NetworkStream networkStream = tcpClient.GetStream();
+            StreamWriter streamWriter = new StreamWriter(networkStream) { AutoFlush = true };
+            streamWriter.Write("Hello from client");
+            networkStream.Close();
         }
 
         private static string getLocalIPAddress()

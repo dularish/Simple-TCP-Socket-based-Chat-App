@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SocketFrm;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -52,7 +53,40 @@ namespace SocketServerApp
         {
             Console.WriteLine("\tSocket accepted. Processing further");
             NetworkStream networkStream = new NetworkStream(socket);
+            //readSimpleString(networkStream);
+            readSocketCommandData(networkStream);
 
+            networkStream.Close();
+
+            socket.Close();
+        }
+
+        private static void readSocketCommandData(NetworkStream networkStream)
+        {
+            SocketCommand socketCommand = SocketCommand.Deserialize(new StreamReader(networkStream));
+
+            handleSocketCommand(socketCommand);
+        }
+
+        private static void handleSocketCommand(SocketCommand socketCommand)
+        {
+            switch (socketCommand.CommandType)
+            {
+                case CommandType.DisplayTextToConsole:
+                    displayTextToConsole(socketCommand as DisplayTextSocketCommand);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private static void displayTextToConsole(DisplayTextSocketCommand displayTextSocketCommand)
+        {
+            Console.WriteLine(displayTextSocketCommand.DisplayText);
+        }
+
+        private static void readSimpleString(NetworkStream networkStream)
+        {
             StreamReader reader = new StreamReader(networkStream);
             StreamWriter writer = new StreamWriter(networkStream);
             string line;
@@ -60,10 +94,6 @@ namespace SocketServerApp
             {
                 Console.WriteLine("\t" + line);
             }
-
-            networkStream.Close();
-
-            socket.Close();
         }
     }
 }
