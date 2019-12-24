@@ -16,6 +16,7 @@ namespace SocketFrm
         public DisplayTextSocketCommand(string displayText)
         {
             _DisplayText = displayText;
+            CommandType = CommandType.DisplayTextToConsole;
         }
 
         

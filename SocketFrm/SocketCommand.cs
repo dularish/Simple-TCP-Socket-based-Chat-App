@@ -18,7 +18,7 @@ namespace SocketFrm
         [DataMember]
         private CommandType _CommandType;
 
-        public CommandType CommandType { get => _CommandType; }
+        public CommandType CommandType { get => _CommandType; protected set => _CommandType = value; }
 
         public byte[] Serialize(out int length)
         {
