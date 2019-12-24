@@ -37,25 +37,33 @@ namespace SocketServerApp
                 {
                     Console.WriteLine("Listening to socket...");
                     Socket socket = tcpListener.AcceptSocket();
-                    Console.WriteLine("Socket accepted. Processing further");
-                    NetworkStream networkStream = new NetworkStream(socket);
-
-                    StreamReader reader = new StreamReader(networkStream);
-                    StreamWriter writer = new StreamWriter(networkStream);
-                    string line;
-                    while(!string.IsNullOrEmpty(line = reader.ReadLine())){
-                        Console.WriteLine(line);
-                    }
-
-                    networkStream.Close();
-
-                    socket.Close();
+                    Task socketHandlerTask = new Task(someSocket => handleSocket(someSocket as Socket), socket);
+                    socketHandlerTask.ContinueWith((taskObj) => Console.WriteLine("\tFinished executing the socket handler."));
+                    socketHandlerTask.Start();
                 }
             }
 
             
 
             Console.ReadKey();
+        }
+
+        private static void handleSocket(Socket socket)
+        {
+            Console.WriteLine("\tSocket accepted. Processing further");
+            NetworkStream networkStream = new NetworkStream(socket);
+
+            StreamReader reader = new StreamReader(networkStream);
+            StreamWriter writer = new StreamWriter(networkStream);
+            string line;
+            while (!string.IsNullOrEmpty(line = reader.ReadLine()))
+            {
+                Console.WriteLine("\t" + line);
+            }
+
+            networkStream.Close();
+
+            socket.Close();
         }
     }
 }
