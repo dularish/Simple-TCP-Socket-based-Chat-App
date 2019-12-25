@@ -30,6 +30,7 @@ namespace SocketServerApp
 
             if(iPAddress != null)
             {
+                ClientsManager clientsManager = new ClientsManager();
                 TcpListener tcpListener = new TcpListener(iPAddress,2060);
 
                 tcpListener.Start();
@@ -37,10 +38,11 @@ namespace SocketServerApp
                 while (true)
                 {
                     Console.WriteLine("Listening to socket...");
-                    Socket socket = tcpListener.AcceptSocket();
-                    Task socketHandlerTask = new Task(someSocket => handleSocket(someSocket as Socket), socket);
-                    socketHandlerTask.ContinueWith((taskObj) => Console.WriteLine("\tFinished executing the socket handler."));
-                    socketHandlerTask.Start();
+                    TcpClient tcpClient = tcpListener.AcceptTcpClient();
+                    clientsManager.AcceptClient(tcpClient);
+                    //Task socketHandlerTask = new Task(someTcpClient => handleTcpClient(someTcpClient as TcpClient), tcpClient);
+                    //socketHandlerTask.ContinueWith((taskObj) => Console.WriteLine("\tFinished executing the socket handler."));
+                    //socketHandlerTask.Start();
                 }
             }
 
@@ -49,38 +51,38 @@ namespace SocketServerApp
             Console.ReadKey();
         }
 
-        private static void handleSocket(Socket socket)
+        private static void handleTcpClient(TcpClient tcpClient)
         {
             Console.WriteLine("\tSocket accepted. Processing further");
-            NetworkStream networkStream = new NetworkStream(socket);
+            NetworkStream networkStream = tcpClient.GetStream();
             //readSimpleString(networkStream);
             readSocketCommandData(networkStream);
 
             networkStream.Close();
 
-            socket.Close();
+            tcpClient.Close();
         }
 
         private static void readSocketCommandData(NetworkStream networkStream)
         {
-            SocketCommand socketCommand = SocketCommand.Deserialize(new StreamReader(networkStream));
+            ClientMessage socketCommand = ClientMessage.Deserialize(new StreamReader(networkStream));
 
             handleSocketCommand(socketCommand);
         }
 
-        private static void handleSocketCommand(SocketCommand socketCommand)
+        private static void handleSocketCommand(ClientMessage socketCommand)
         {
-            switch (socketCommand.CommandType)
+            switch (socketCommand.ClientMessageType)
             {
-                case CommandType.DisplayTextToConsole:
-                    displayTextToConsole(socketCommand as DisplayTextSocketCommand);
+                case ClientMessageType.DisplayTextToConsole:
+                    displayTextToConsole(socketCommand as DisplayTextClientMessage);
                     break;
                 default:
                     break;
             }
         }
 
-        private static void displayTextToConsole(DisplayTextSocketCommand displayTextSocketCommand)
+        private static void displayTextToConsole(DisplayTextClientMessage displayTextSocketCommand)
         {
             Console.WriteLine(displayTextSocketCommand.DisplayText);
         }

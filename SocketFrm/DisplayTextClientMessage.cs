@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 namespace SocketFrm
 {
     [DataContract]
-    public class DisplayTextSocketCommand : SocketCommand
+    public class DisplayTextClientMessage : ClientMessage
     {
         [DataMember]
         private string _DisplayText;
 
-        public DisplayTextSocketCommand(string displayText)
+        public DisplayTextClientMessage(string displayText)
         {
             _DisplayText = displayText;
-            CommandType = CommandType.DisplayTextToConsole;
+            ClientMessageType = ClientMessageType.DisplayTextToConsole;
         }
 
         
