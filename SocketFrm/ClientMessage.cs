@@ -9,10 +9,12 @@ using System.Xml;
 
 namespace SocketFrm
 {
-    public enum ClientMessageType { DisplayTextToConsole}
+    public enum ClientMessageType { DisplayTextToConsole, RegisterIDInServer, TransmitToPeer }
 
     [DataContract]
     [KnownType(typeof(DisplayTextClientMessage))]
+    [KnownType(typeof(RegisterIdClientMessage))]
+    [KnownType(typeof(TransmitToPeerClientMessage))]
     public abstract class ClientMessage
     {
         [DataMember]
