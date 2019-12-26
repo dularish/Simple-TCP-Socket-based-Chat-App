@@ -16,13 +16,14 @@ namespace SocketServerApp
         private TcpClient tcpClient;
 
         private static ConcurrentQueue<ServerMessage> _serverMessagesQueue = new ConcurrentQueue<ServerMessage>();
+        private Timer _serverMessagesQueueTimer;
 
         public event EventHandler<ClientDisconnectedEventArgs> ClientDisconnected;
 
         public Client(TcpClient tcpClient)
         {
             this.tcpClient = tcpClient;
-
+            ClientDisconnected += Client_ClientDisconnected;
             try
             {
                 Task readStreamTask = new Task((someTcpClientObj) => this.ReadStream(someTcpClientObj as TcpClient), tcpClient);
@@ -38,12 +39,28 @@ namespace SocketServerApp
             }
         }
 
+        /// <summary>
+        /// Closes the running tasks on disconnection
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Client_ClientDisconnected(object sender, ClientDisconnectedEventArgs e)
+        {
+            _serverMessagesQueueTimer.Stop();
+            _serverMessagesQueueTimer.Dispose();
+        }
+
         private void RandomlyQueueServerMessages()
         {
             Random randGen = new Random(36);
-            Timer timer = new Timer(randGen.Next(3000, 6000));
-            timer.Elapsed += Timer_Elapsed;
-            timer.Start();
+            if(_serverMessagesQueueTimer != null)
+            {
+                _serverMessagesQueueTimer.Stop();
+                _serverMessagesQueueTimer.Dispose();
+            }
+            _serverMessagesQueueTimer = new Timer(randGen.Next(3000, 6000));
+            _serverMessagesQueueTimer.Elapsed += Timer_Elapsed;
+            _serverMessagesQueueTimer.Start();
         }
 
         private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -75,21 +92,24 @@ namespace SocketServerApp
                             Console.WriteLine("The client was forcibly closed during the write process.. :(");
                             Console.WriteLine("Message : " + ioEx.Message + "\nStackTrace : " + ioEx.StackTrace + "\n\n");
                             ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(this));
+                            break;
                         }
                         catch (InvalidOperationException iopEx)
                         {
-                            Console.WriteLine("Client had forcibly closed the connection before .. :(");
+                            Console.WriteLine("Write process : Client had forcibly closed the connection before .. :(");
                             Console.WriteLine("Message : " + iopEx.Message);
                             ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(this));
+                            break;
                         }
                         catch (Exception ex)
                         {
                             Console.WriteLine(ex.GetType().ToString() + "\n" + ex.Message + "\n" + ex.StackTrace);
-                            Console.ReadKey();
+                            break;
                         }
                     }
                 }
             }
+            Console.ReadKey();
         }
 
         private void ReadStream(TcpClient tcpClient)
@@ -112,19 +132,22 @@ namespace SocketServerApp
                     Console.WriteLine("The client was forcibly closed during the read process.. :(");
                     Console.WriteLine("Message : " + ioEx.Message);
                     ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(this));
+                    break;
                 }
                 catch (InvalidOperationException iopEx)
                 {
-                    Console.WriteLine("Client had forcibly closed the connection before .. :(");
+                    Console.WriteLine("Read process : Client had forcibly closed the connection before .. :(");
                     Console.WriteLine("Message : " + iopEx.Message);
                     ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(this));
+                    break;
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.GetType().ToString() + "\n" + ex.Message + "\n" + ex.StackTrace);
-                    Console.ReadKey();
+                    break;
                 }
             }
+            Console.ReadKey();
         }
 
         private void handleClientMessage(ClientMessage clientMessage)

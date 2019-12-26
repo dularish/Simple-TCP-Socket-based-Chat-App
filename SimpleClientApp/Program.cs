@@ -34,6 +34,7 @@ namespace SimpleClientApp
             }
             finally
             {
+                tcpClient.Client.Shutdown(SocketShutdown.Both);
                 tcpClient.Close();
             }
 
@@ -75,20 +76,24 @@ namespace SimpleClientApp
                         {
                             Console.WriteLine("Server was forcibly closed during the write process.. :(");
                             Console.WriteLine("Message : " + ioEx.Message);
+                            break;
                         }
                         catch(InvalidOperationException iopEx)
                         {
-                            Console.WriteLine("Server had forcibly close the connection before .. :(");
+                            Console.WriteLine("Read process : Server had forcibly close the connection before .. :(");
                             Console.WriteLine("Message : " + iopEx.Message);
+                            break;
                         }
                         catch (Exception ex)
                         {
                             Console.WriteLine(ex.GetType().ToString() + "\n" + ex.Message + "\n" + ex.StackTrace);
-                            Console.ReadKey();
+                            
+                            break;
                         }
                     }
                 }
             }
+            Console.ReadKey();
         }
 
         private static void ReadStream(TcpClient tcpClient)
@@ -110,18 +115,21 @@ namespace SimpleClientApp
                 {
                     Console.WriteLine("Server was forcibly closed during the read process.. :(");
                     Console.WriteLine("Message : " + ioEx.Message);
+                    break;
                 }
                 catch (InvalidOperationException iopEx)
                 {
-                    Console.WriteLine("Server had forcibly close the connection before .. :(");
+                    Console.WriteLine("Write process : Server had forcibly close the connection before .. :(");
                     Console.WriteLine("Message : " + iopEx.Message);
+                    break;
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.GetType().ToString() + "\n" + ex.Message + "\n" + ex.StackTrace);
-                    Console.ReadKey();
+                    break;
                 }
             }
+            Console.ReadKey();
         }
 
         private static void handleServerMessage(ServerMessage serverMessage)
