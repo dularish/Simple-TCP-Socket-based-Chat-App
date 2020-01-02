@@ -9,7 +9,7 @@ using System.Xml;
 
 namespace SocketFrm
 {
-    public enum ServerMessageType { DisplayTextToConsole, RegisterIdResult, ClientAvailabilityNotification, TransmitToPeerResult }
+    public enum ServerMessageType { DisplayTextToConsole, RegisterIdResult, ClientAvailabilityNotification, TransmitToPeerResult, TransmitToPeer }
 
     [DataContract]
     [KnownType(typeof(DisplayTextServerMessage))]

@@ -45,6 +45,8 @@
     <Compile Include="DisplayTextClientMessage.cs" />
     <Compile Include="ClientMessage.cs" />
     <Compile Include="DisplayTextServerMessage.cs" />
+    <Compile Include="IClientUINotifier.cs" />
+    <Compile Include="IServerUINotifier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegisterIdClientMessage.cs" />
     <Compile Include="RegisterIdResultServerMessage.cs" />
@@ -52,6 +54,7 @@
     <Compile Include="ServerMessage.cs" />
     <Compile Include="TransmitToPeerClientMessage.cs" />
     <Compile Include="TransmitToPeerResultServerMessage.cs" />
+    <Compile Include="TransmitToPeerServerMessage.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

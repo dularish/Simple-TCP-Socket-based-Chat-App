@@ -14,15 +14,21 @@ namespace SocketServerApp
     public class Client
     {
         private TcpClient tcpClient;
-
-        private static ConcurrentQueue<ServerMessage> _serverMessagesQueue = new ConcurrentQueue<ServerMessage>();
+        private IServerUINotifier _UINotifier;
+        private ConcurrentQueue<ServerMessage> _serverMessagesQueue = new ConcurrentQueue<ServerMessage>();
         private Timer _serverMessagesQueueTimer;
+        private string _ID;
+
+        public string ID { get => _ID; private set => _ID = value; }
 
         public event EventHandler<ClientDisconnectedEventArgs> ClientDisconnected;
+        public event EventHandler<ClientRegisterRequestEventArgs> ClientRegisterRequested;
+        public event EventHandler<ClientTransmittedPeerMessageEventArgs> ClientTransmittedPeerMessage;
 
-        public Client(TcpClient tcpClient)
+        public Client(TcpClient tcpClient, IServerUINotifier uiNotifier)
         {
             this.tcpClient = tcpClient;
+            _UINotifier = uiNotifier;
             ClientDisconnected += Client_ClientDisconnected;
             try
             {
@@ -31,6 +37,7 @@ namespace SocketServerApp
                 Task writeStreamTask = new Task((someTcpClientObj) => this.WriteStream(someTcpClientObj as TcpClient), tcpClient);
                 writeStreamTask.Start();
                 Task.Run(() => this.RandomlyQueueServerMessages());
+                Task.WhenAny(new List<Task>() { readStreamTask, writeStreamTask }).Wait();
             }
             catch (Exception ex)
             {
@@ -63,10 +70,15 @@ namespace SocketServerApp
             _serverMessagesQueueTimer.Start();
         }
 
-        private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            ServerMessage clientMessage = new DisplayTextServerMessage("Server says Now the time is " + DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
-            _serverMessagesQueue.Enqueue(clientMessage);
+            ServerMessage serverMessage = new DisplayTextServerMessage("Server says Now the time is " + DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
+            _serverMessagesQueue.Enqueue(serverMessage);
+        }
+
+        public void EnqueueServerMessage(ServerMessage serverMessage)
+        {
+            _serverMessagesQueue.Enqueue(serverMessage);
         }
 
         private void WriteStream(TcpClient tcpClient)
@@ -155,17 +167,50 @@ namespace SocketServerApp
             switch (clientMessage.ClientMessageType)
             {
                 case ClientMessageType.DisplayTextToConsole:
-                    displayTextToConsole(clientMessage as DisplayTextClientMessage);
+                    _UINotifier.HandleDisplayTextToConsoleMessage(clientMessage as DisplayTextClientMessage);
+                    break;
+                case ClientMessageType.RegisterIDInServer:
+                    RegisterIdClientMessage registerIdClientMessage = clientMessage as RegisterIdClientMessage;
+                    ID = registerIdClientMessage.ID;
+                    ClientRegisterRequested?.Invoke(this, new ClientRegisterRequestEventArgs(registerIdClientMessage.ID, this));
+                    _UINotifier.HandleRegisterIDInServerMessage(registerIdClientMessage);
+                    break;
+                case ClientMessageType.TransmitToPeer:
+                    TransmitToPeerClientMessage transmitToPeerClientMessage = clientMessage as TransmitToPeerClientMessage;
+                    ClientTransmittedPeerMessage?.Invoke(this, new ClientTransmittedPeerMessageEventArgs(transmitToPeerClientMessage));
+                    _UINotifier.HandleTransmitToPeerMessage(transmitToPeerClientMessage);
                     break;
                 default:
                     break;
             }
         }
+    }
 
-        private static void displayTextToConsole(DisplayTextClientMessage displayTextSocketCommand)
+    public class ClientTransmittedPeerMessageEventArgs : EventArgs
+    {
+        private TransmitToPeerClientMessage _TransmitToPeerClientMessage;
+
+        public ClientTransmittedPeerMessageEventArgs(TransmitToPeerClientMessage transmitToPeerClientMessage)
         {
-            Console.WriteLine(displayTextSocketCommand.DisplayText);
+            this.TransmitToPeerClientMessage = transmitToPeerClientMessage;
         }
+
+        public TransmitToPeerClientMessage TransmitToPeerClientMessage { get => _TransmitToPeerClientMessage; private set => _TransmitToPeerClientMessage = value; }
+    }
+
+    public class ClientRegisterRequestEventArgs : EventArgs
+    {
+        private string _ID;
+        private Client _Client;
+
+        public ClientRegisterRequestEventArgs(string id, Client client)
+        {
+            ID = id;
+            Client = client;
+        }
+
+        public string ID { get => _ID; private set => _ID = value; }
+        public Client Client { get => _Client; private set => _Client = value; }
     }
 
     public class ClientDisconnectedEventArgs : EventArgs

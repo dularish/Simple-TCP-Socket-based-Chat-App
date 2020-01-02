@@ -14,53 +14,114 @@ namespace SimpleClientApp
 {
     class Program
     {
-        private static ConcurrentQueue<ClientMessage> _clientMessagesQueue = new ConcurrentQueue<ClientMessage>();
-
         static void Main(string[] args)
         {
-            TcpClient tcpClient = new TcpClient(Dns.GetHostName(), 2060);
-
+            ClientAppState clientAppState = new ClientAppState();
+            clientAppState.ClientUINotifier = new ConsoleNotifier();
+            clientAppState.TCPClient = new TcpClient(Dns.GetHostName(), 2060);
             try
             {
                 //writeSimpleStringToStream(tcpClient);
                 //writeSimpleCommandToStream(tcpClient);
-                Task readStreamTask = new Task((someTcpClientObj) => ReadStream(someTcpClientObj as TcpClient), tcpClient);
+                Task readStreamTask = new Task((someClientAppState) => ReadStream(someClientAppState as ClientAppState), clientAppState);
                 readStreamTask.Start();
-                Task writeStreamTask = new Task((someTcpClientObj) => WriteStream(someTcpClientObj as TcpClient), tcpClient);
+                Task writeStreamTask = new Task((someClientAppState) => WriteStream(someClientAppState as ClientAppState), clientAppState);
                 writeStreamTask.Start();
-                Task.Run(() => RandomlyQueueClientMessages());
+                //Task.Run(() => RandomlyQueueClientMessages());
+                Task.Run(() => { AskForRegistration(clientAppState); ContinuouslyGetInputFromUser(clientAppState); });
 
                 Task.WhenAny(new List<Task>() { readStreamTask, writeStreamTask }).Wait();
             }
             finally
             {
-                tcpClient.Client.Shutdown(SocketShutdown.Both);
-                tcpClient.Close();
+                clientAppState.TCPClient.Client.Shutdown(SocketShutdown.Both);
+                clientAppState.TCPClient.Close();
             }
 
         }
 
-        private static void RandomlyQueueClientMessages()
-        {
-            Random randGen = new Random(36);
-            Timer timer = new Timer(randGen.Next(3000,6000));
-            timer.Elapsed += Timer_Elapsed;
-            timer.Start();
-        }
-
-        private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            ClientMessage clientMessage = new DisplayTextClientMessage("Client says Now the time is " + DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
-            _clientMessagesQueue.Enqueue(clientMessage);
-        }
-
-        private static void WriteStream(TcpClient tcpClient)
+        private static void AskForRegistration(ClientAppState clientAppState)
         {
             while (true)
             {
-                if (!_clientMessagesQueue.IsEmpty)
+                Console.WriteLine("Enter your desired registration Id :");
+                string registrationId = Console.ReadLine();
+                if ((registrationId?.Length ?? 0) > 5)
                 {
-                    if(_clientMessagesQueue.TryDequeue(out ClientMessage clientMessage))
+                    clientAppState.ClientMessagesQueue.Enqueue(new RegisterIdClientMessage(registrationId));
+                    clientAppState.ClientId = registrationId;//have to avoid this later
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("Enter a valid registration Id.");
+                }
+            }
+        }
+
+        private static void ContinuouslyGetInputFromUser(ClientAppState clientAppState)
+        {
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("1. See available registered clients");
+                Console.WriteLine("2. Send text message");
+                Console.WriteLine("Enter the choice : ");
+                ConsoleKeyInfo choice = Console.ReadKey();
+
+                switch (choice.KeyChar)
+                {
+                    case '1':
+                        if(clientAppState.AvailableUsers.Count > 0)
+                        {
+                            Console.WriteLine(clientAppState.AvailableUsers.Aggregate((x, y) => x + "\n" + y));
+                        }
+                        else
+                        {
+                            Console.WriteLine(string.Empty);
+                        }
+                        break;
+                    case '2':
+                        if (string.IsNullOrEmpty(clientAppState.ClientId))
+                        {
+                            Console.WriteLine("Please get the user registerred before proceeding");
+                        }
+                        while (true)
+                        {
+                            Console.WriteLine("Enter the receiver clientId : ");
+                            string receiverClientId = Console.ReadLine();
+                            if (clientAppState.AvailableUsers.Contains(receiverClientId))
+                            {
+                                Console.WriteLine("Continue entering the messages");
+                                while (true)
+                                {
+                                    string message = Console.ReadLine();
+                                    if (!string.IsNullOrEmpty(message))
+                                    {
+                                        clientAppState.ClientMessagesQueue.Enqueue(new TransmitToPeerClientMessage(message, receiverClientId, clientAppState.ClientId, 1));
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private static void WriteStream(ClientAppState clientAppState)
+        {
+            var tcpClient = clientAppState.TCPClient;
+            var clientMessagesQueue = clientAppState.ClientMessagesQueue;
+            while (true)
+            {
+                if (!clientMessagesQueue.IsEmpty)
+                {
+                    if(clientMessagesQueue.TryDequeue(out ClientMessage clientMessage))
                     {
                         try
                         {
@@ -96,8 +157,9 @@ namespace SimpleClientApp
             Console.ReadKey();
         }
 
-        private static void ReadStream(TcpClient tcpClient)
+        private static void ReadStream(ClientAppState clientAppState)
         {
+            var tcpClient = clientAppState.TCPClient;
             NetworkStream networkStream = tcpClient.GetStream();
 
             while (true)
@@ -108,7 +170,7 @@ namespace SimpleClientApp
                     {
                         ServerMessage serverMessage = ServerMessage.Deserialize(new StreamReader(networkStream));
 
-                        handleServerMessage(serverMessage);
+                        handleServerMessage(serverMessage, clientAppState);
                     }
                 }
                 catch(IOException ioEx)
@@ -132,21 +194,50 @@ namespace SimpleClientApp
             Console.ReadKey();
         }
 
-        private static void handleServerMessage(ServerMessage serverMessage)
+        private static void handleServerMessage(ServerMessage serverMessage, ClientAppState clientAppState)
         {
             switch (serverMessage.ServerMessageType)
             {
                 case ServerMessageType.DisplayTextToConsole:
-                    displayTextToConsole(serverMessage as DisplayTextServerMessage);
+                    clientAppState.ClientUINotifier.HandleDisplayTextServerMessage(serverMessage as DisplayTextServerMessage);
+                    break;
+                case ServerMessageType.RegisterIdResult:
+                    clientAppState.ClientUINotifier.HandleRegisterIDResultServerMessage(serverMessage as RegisterIdResultServerMessage);
+                    handleRegisterIDResultServerMessage(serverMessage as RegisterIdResultServerMessage, clientAppState);
+                    break;
+                case ServerMessageType.ClientAvailabilityNotification:
+                    clientAppState.ClientUINotifier.HandleClientAvailabilityNotificationServerMessage(serverMessage as ClientAvailabilityNotificationServerMessage);
+                    handleClientAvailabilityNotificationServerMessage(serverMessage as ClientAvailabilityNotificationServerMessage, clientAppState);
+                    break;
+                case ServerMessageType.TransmitToPeerResult:
+                    clientAppState.ClientUINotifier.HandleTransmitToPeerResultServerMessage(serverMessage as TransmitToPeerResultServerMessage);
+                    break;
+                case ServerMessageType.TransmitToPeer:
+                    clientAppState.ClientUINotifier.HandleTransmitToPeeServerMessage(serverMessage as TransmitToPeerServerMessage);
                     break;
                 default:
                     break;
             }
         }
 
-        private static void displayTextToConsole(DisplayTextServerMessage displayTextServerMessage)
+        private static void handleRegisterIDResultServerMessage(RegisterIdResultServerMessage registerIdResultServerMessage, ClientAppState clientAppState)
         {
-            Console.WriteLine(displayTextServerMessage.DisplayText);
+            if (!registerIdResultServerMessage.Result)
+            {
+                clientAppState.ClientId = string.Empty;
+            }
+        }
+
+        private static void handleClientAvailabilityNotificationServerMessage(ClientAvailabilityNotificationServerMessage clientAvailabilityNotificationServerMessage, ClientAppState clientAppState)
+        {
+            if (clientAvailabilityNotificationServerMessage.IsAvailable)
+            {
+                clientAppState.AvailableUsers.Add(clientAvailabilityNotificationServerMessage.ClientUniqueId);
+            }
+            else
+            {
+                clientAppState.AvailableUsers.Remove(clientAvailabilityNotificationServerMessage.ClientUniqueId);
+            }
         }
 
         private static void writeSimpleCommandToStream(TcpClient tcpClient)

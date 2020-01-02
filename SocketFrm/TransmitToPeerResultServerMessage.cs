@@ -13,11 +13,11 @@ namespace SocketFrm
         [DataMember]
         private string _ReceiverClientId;
         [DataMember]
-        private string _SenderMessageId;
+        private int _SenderMessageId;
         [DataMember]
         private bool _IsReceivedByReceiver;
 
-        public TransmitToPeerResultServerMessage(string receiverClientId, string senderMessageId, bool isReceivedByReceiver)
+        public TransmitToPeerResultServerMessage(string receiverClientId, int senderMessageId, bool isReceivedByReceiver)
         {
             ReceiverClientId = receiverClientId;
             SenderMessageId = senderMessageId;
@@ -26,7 +26,7 @@ namespace SocketFrm
         }
 
         public string ReceiverClientId { get => _ReceiverClientId; private set => _ReceiverClientId = value; }
-        public string SenderMessageId { get => _SenderMessageId; private set => _SenderMessageId = value; }
+        public int SenderMessageId { get => _SenderMessageId; private set => _SenderMessageId = value; }
         public bool IsReceivedByReceiver { get => _IsReceivedByReceiver; private set => _IsReceivedByReceiver = value; }
     }
 }

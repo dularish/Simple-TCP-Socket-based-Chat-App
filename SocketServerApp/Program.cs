@@ -30,7 +30,7 @@ namespace SocketServerApp
 
             if(iPAddress != null)
             {
-                ClientsManager clientsManager = new ClientsManager();
+                ClientsManager clientsManager = new ClientsManager(new ConsoleNotifier());
                 TcpListener tcpListener = new TcpListener(iPAddress,2060);
 
                 tcpListener.Start();
