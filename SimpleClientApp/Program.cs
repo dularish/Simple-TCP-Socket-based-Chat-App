@@ -88,14 +88,22 @@ namespace SimpleClientApp
                         }
                         while (true)
                         {
-                            Console.WriteLine("Enter the receiver clientId : ");
+                            Console.WriteLine("Enter the receiver clientId : (Enter \"!!Back\" to go one step back)");
                             string receiverClientId = Console.ReadLine();
+                            if(receiverClientId == "!!Back")
+                            {
+                                break;
+                            }
                             if (clientAppState.AvailableUsers.Contains(receiverClientId))
                             {
-                                Console.WriteLine("Continue entering the messages");
+                                Console.WriteLine("Continue entering the messages (Enter \"!!Back\" to go one step back)");
                                 while (true)
                                 {
                                     string message = Console.ReadLine();
+                                    if (message == "!!Back")
+                                    {
+                                        break;
+                                    }
                                     if (!string.IsNullOrEmpty(message))
                                     {
                                         clientAppState.ClientMessagesQueue.Enqueue(new TransmitToPeerClientMessage(message, receiverClientId, clientAppState.ClientId, 1));
@@ -107,6 +115,7 @@ namespace SimpleClientApp
                                 }
                             }
                         }
+                        break;
                     default:
                         break;
                 }

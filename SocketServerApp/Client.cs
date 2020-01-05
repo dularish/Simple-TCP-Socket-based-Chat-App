@@ -52,8 +52,8 @@ namespace SocketServerApp
         /// <param name="e"></param>
         private void Client_ClientDisconnected(object sender, ClientDisconnectedEventArgs e)
         {
-            _serverMessagesQueueTimer.Stop();
-            _serverMessagesQueueTimer.Dispose();
+            _serverMessagesQueueTimer?.Stop();
+            _serverMessagesQueueTimer?.Dispose();
         }
 
         private void RandomlyQueueServerMessages()
