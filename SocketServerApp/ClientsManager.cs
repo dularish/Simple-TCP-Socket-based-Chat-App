@@ -23,7 +23,7 @@ namespace SocketServerApp
         public void AcceptClient(TcpClient tcpClient)
         {
             Client newClient = new Client(tcpClient, _UINotifier);
-
+            _ClientsConnected.Add(newClient);
             newClient.ClientDisconnected += OnClientDisconnected;
             newClient.ClientRegisterRequested += OnClientRegisterRequested;
             newClient.ClientTransmittedPeerMessage += OnClientTransmittedPeerMessage;
@@ -55,6 +55,7 @@ namespace SocketServerApp
                     if (client != e.Client)
                     {
                         client.EnqueueServerMessage(new ClientAvailabilityNotificationServerMessage(e.ID, true));
+                        e.Client.EnqueueServerMessage(new ClientAvailabilityNotificationServerMessage(client.ID, true));
                     }
                 });
             }

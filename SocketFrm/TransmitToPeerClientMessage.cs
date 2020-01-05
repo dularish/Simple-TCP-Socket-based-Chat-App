@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace SocketFrm
 {
+    [Serializable]
     [DataContract]
     public class TransmitToPeerClientMessage : ClientMessage
     {

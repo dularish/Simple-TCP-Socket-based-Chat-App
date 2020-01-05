@@ -14,7 +14,7 @@ namespace SimpleClientApp
             Console.WriteLine(displayTextServerMessage.DisplayText);
         }
 
-        internal void HandleRegisterIDResultServerMessage(RegisterIdResultServerMessage registerIdResultServerMessage)
+        public void HandleRegisterIDResultServerMessage(RegisterIdResultServerMessage registerIdResultServerMessage)
         {
             if (registerIdResultServerMessage.Result)
             {
@@ -26,18 +26,18 @@ namespace SimpleClientApp
             }
         }
 
-        internal void HandleClientAvailabilityNotificationServerMessage(ClientAvailabilityNotificationServerMessage clientAvailabilityNotificationServerMessage)
+        public void HandleClientAvailabilityNotificationServerMessage(ClientAvailabilityNotificationServerMessage clientAvailabilityNotificationServerMessage)
         {
             string textForStatus = clientAvailabilityNotificationServerMessage.IsAvailable ? " has joined" : " has left";
             Console.WriteLine(clientAvailabilityNotificationServerMessage.ClientUniqueId + textForStatus);
         }
 
-        internal void HandleTransmitToPeerResultServerMessage(TransmitToPeerResultServerMessage transmitToPeerResultServerMessage)
+        public void HandleTransmitToPeerResultServerMessage(TransmitToPeerResultServerMessage transmitToPeerResultServerMessage)
         {
             //doing nothing
         }
 
-        internal void HandleTransmitToPeeServerMessage(TransmitToPeerServerMessage transmitToPeerServerMessage)
+        public void HandleTransmitToPeeServerMessage(TransmitToPeerServerMessage transmitToPeerServerMessage)
         {
             Console.WriteLine(transmitToPeerServerMessage.TransmitToPeerClientMessage.SenderClientId + " : " + transmitToPeerServerMessage.TransmitToPeerClientMessage.TextMessage);
         }

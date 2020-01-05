@@ -36,8 +36,7 @@ namespace SocketServerApp
                 readStreamTask.Start();
                 Task writeStreamTask = new Task((someTcpClientObj) => this.WriteStream(someTcpClientObj as TcpClient), tcpClient);
                 writeStreamTask.Start();
-                Task.Run(() => this.RandomlyQueueServerMessages());
-                Task.WhenAny(new List<Task>() { readStreamTask, writeStreamTask }).Wait();
+                //Task.Run(() => this.RandomlyQueueServerMessages());
             }
             catch (Exception ex)
             {
@@ -134,7 +133,7 @@ namespace SocketServerApp
                 {
                     if (networkStream.DataAvailable)
                     {
-                        ClientMessage clientMessage = ClientMessage.Deserialize(new StreamReader(networkStream));
+                        ClientMessage clientMessage = ClientMessage.Deserialize(networkStream);
 
                         handleClientMessage(clientMessage);
                     }

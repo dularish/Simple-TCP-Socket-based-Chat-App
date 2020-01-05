@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -11,6 +13,7 @@ namespace SocketFrm
 {
     public enum ServerMessageType { DisplayTextToConsole, RegisterIdResult, ClientAvailabilityNotification, TransmitToPeerResult, TransmitToPeer }
 
+    [Serializable]
     [DataContract]
     [KnownType(typeof(DisplayTextServerMessage))]
     [KnownType(typeof(RegisterIdResultServerMessage))]
@@ -25,42 +28,35 @@ namespace SocketFrm
 
         public byte[] Serialize(out int length)
         {
-            var allTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(assembly => assembly.GetTypes()).Where(s => typeof(ServerMessage).IsAssignableFrom(s));
-
             MemoryStream memoryStream = new MemoryStream();
-            DataContractSerializer dataContractSerializer = new DataContractSerializer(typeof(ServerMessage), allTypes);
-            XmlWriterSettings xmlWriterSettings = new XmlWriterSettings();
-            xmlWriterSettings.Indent = true;
-            xmlWriterSettings.Encoding = new UnicodeEncoding();
-            XmlWriter xmlWriter = XmlWriter.Create(memoryStream, xmlWriterSettings);
-            dataContractSerializer.WriteObject(xmlWriter, this);
-            xmlWriter.Flush();
-            byte[] buffer = memoryStream.GetBuffer();
-            length = (int)memoryStream.Length;
-            xmlWriter.Close();
-            memoryStream.Close();
-            return buffer;
+            BinaryFormatter bf = new BinaryFormatter();
+            bf.Serialize(memoryStream, this);
+            byte[] data = memoryStream.ToArray();
+
+            byte[] sizeOfData = BitConverter.GetBytes(data.Length);
+            length = data.Length + 4;
+            return sizeOfData.Concat(data).ToArray();
         }
 
-        public static ServerMessage Deserialize(StreamReader streamReader)
+        public static ServerMessage Deserialize(NetworkStream networkStream)
         {
-            var allTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(assembly => assembly.GetTypes()).Where(s => typeof(ServerMessage).IsAssignableFrom(s));
+            ServerMessage message = null;
 
-            DataContractSerializer dataContractSerializer = new DataContractSerializer(typeof(ServerMessage), allTypes);
-            XmlReaderSettings xmlReaderSettings = new XmlReaderSettings()
+            byte[] dataSizeBytes = new byte[4];
+            int readBytes = networkStream.Read(dataSizeBytes, 0, 4);
+            int dataSize = BitConverter.ToInt32(dataSizeBytes, 0);
+
+
+            BinaryReader binaryReader = new BinaryReader(networkStream);
+            byte[] data = binaryReader.ReadBytes(dataSize);
+
+            using (MemoryStream ms = new MemoryStream(data))
             {
-                ConformanceLevel = ConformanceLevel.Fragment
-                //Conformance level is fragment because we have multiple xmls in the same stream
-            };
-            
-            XmlReader xmlReader = XmlReader.Create(streamReader, xmlReaderSettings);
-            XmlDictionaryReader xmlDictionaryReader = XmlDictionaryReader.CreateDictionaryReader(xmlReader);
-            var data = dataContractSerializer.ReadObject(xmlReader);
-            xmlDictionaryReader.Close();
-            xmlReader.Close();
-            //streamReader.Close();//Do not close the streamReader here
+                BinaryFormatter bf = new BinaryFormatter();
+                message = (ServerMessage)bf.Deserialize(ms);
+            }
 
-            return data as ServerMessage;
+            return message;
         }
     }
 }

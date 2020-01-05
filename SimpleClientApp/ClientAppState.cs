@@ -12,12 +12,12 @@ namespace SimpleClientApp
     internal class ClientAppState
     {
         private ConcurrentQueue<ClientMessage> _clientMessagesQueue = new ConcurrentQueue<ClientMessage>();
-        private ConsoleNotifier _clientUINotifier;
+        private IClientUINotifier _clientUINotifier;
         private List<string> _availableUsers = new List<string>();
         private string _clientId = "Unnamed";
 
         public ConcurrentQueue<ClientMessage> ClientMessagesQueue { get => _clientMessagesQueue; set => _clientMessagesQueue = value; }
-        public ConsoleNotifier ClientUINotifier { get => _clientUINotifier; set => _clientUINotifier = value; }
+        public IClientUINotifier ClientUINotifier { get => _clientUINotifier; set => _clientUINotifier = value; }
         public List<string> AvailableUsers { get => _availableUsers; set => _availableUsers = value; }
         public string ClientId { get => _clientId; set => _clientId = value; }
         public TcpClient TCPClient { get; internal set; }

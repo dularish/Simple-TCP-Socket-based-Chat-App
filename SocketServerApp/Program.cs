@@ -65,7 +65,7 @@ namespace SocketServerApp
 
         private static void readSocketCommandData(NetworkStream networkStream)
         {
-            ClientMessage socketCommand = ClientMessage.Deserialize(new StreamReader(networkStream));
+            ClientMessage socketCommand = ClientMessage.Deserialize(networkStream);
 
             handleSocketCommand(socketCommand);
         }

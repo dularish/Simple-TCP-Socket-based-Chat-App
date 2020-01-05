@@ -168,7 +168,7 @@ namespace SimpleClientApp
                 {
                     if (networkStream.DataAvailable)
                     {
-                        ServerMessage serverMessage = ServerMessage.Deserialize(new StreamReader(networkStream));
+                        ServerMessage serverMessage = ServerMessage.Deserialize(networkStream);
 
                         handleServerMessage(serverMessage, clientAppState);
                     }
