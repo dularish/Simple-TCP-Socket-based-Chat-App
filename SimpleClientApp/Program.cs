@@ -18,7 +18,10 @@ namespace SimpleClientApp
         {
             ClientAppState clientAppState = new ClientAppState();
             clientAppState.ClientUINotifier = new ConsoleNotifier();
-            clientAppState.TCPClient = new TcpClient(Dns.GetHostName(), 2060);
+            IPAddress serverIP = IPAddress.Parse(System.Configuration.ConfigurationSettings.AppSettings["ServerIP"]);
+            int serverPort = Int32.Parse(System.Configuration.ConfigurationSettings.AppSettings["ServerPort"]);
+            clientAppState.TCPClient = new TcpClient();
+            clientAppState.TCPClient.Connect(new IPEndPoint(serverIP, serverPort));
             try
             {
                 //writeSimpleStringToStream(tcpClient);

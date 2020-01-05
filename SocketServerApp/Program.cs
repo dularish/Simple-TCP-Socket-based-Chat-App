@@ -14,41 +14,20 @@ namespace SocketServerApp
     {
         static void Main(string[] args)
         {
-            string domainName = Dns.GetHostName();
-
-            IPAddress iPAddress = null;
-
-            foreach (var addressItem in Dns.GetHostEntry(domainName).AddressList)
-            {
-                Console.WriteLine("{0}/{1}", domainName, addressItem);
-                if (addressItem.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    iPAddress = addressItem;
-                    break;
-                }
-            }
-
-            if(iPAddress != null)
-            {
-                ClientsManager clientsManager = new ClientsManager(new ConsoleNotifier());
-                TcpListener tcpListener = new TcpListener(iPAddress,2060);
-
-                tcpListener.Start();
-
-                while (true)
-                {
-                    Console.WriteLine("Listening to socket...");
-                    TcpClient tcpClient = tcpListener.AcceptTcpClient();
-                    clientsManager.AcceptClient(tcpClient);
-                    //Task socketHandlerTask = new Task(someTcpClient => handleTcpClient(someTcpClient as TcpClient), tcpClient);
-                    //socketHandlerTask.ContinueWith((taskObj) => Console.WriteLine("\tFinished executing the socket handler."));
-                    //socketHandlerTask.Start();
-                }
-            }
-
             
+            ClientsManager clientsManager = new ClientsManager(new ConsoleNotifier());
+            TcpListener tcpListener = new TcpListener(IPAddress.Any, 2060);
+            tcpListener.Start();
 
-            Console.ReadKey();
+            while (true)
+            {
+                Console.WriteLine("Listening to socket...");
+                TcpClient tcpClient = tcpListener.AcceptTcpClient();
+                clientsManager.AcceptClient(tcpClient);
+                //Task socketHandlerTask = new Task(someTcpClient => handleTcpClient(someTcpClient as TcpClient), tcpClient);
+                //socketHandlerTask.ContinueWith((taskObj) => Console.WriteLine("\tFinished executing the socket handler."));
+                //socketHandlerTask.Start();
+            }
         }
 
         private static void handleTcpClient(TcpClient tcpClient)
