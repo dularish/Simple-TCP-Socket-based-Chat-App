@@ -16,8 +16,16 @@ namespace SimpleClientApp
     {
         static void Main(string[] args)
         {
-            ClientAppState clientAppState = new ClientAppState();
-            clientAppState.ClientUINotifier = new ConsoleNotifier();
+            ClientAppState clientAppState = new ClientAppState(new ConsoleNotifier());
+            ConnectWithServer(clientAppState);
+
+        }
+        /// <summary>
+        /// Blocking call to connect with server
+        /// </summary>
+        /// <param name="clientAppState"></param>
+        public static void ConnectWithServer(ClientAppState clientAppState)
+        {
             IPAddress serverIP = IPAddress.Parse(System.Configuration.ConfigurationSettings.AppSettings["ServerIP"]);
             int serverPort = Int32.Parse(System.Configuration.ConfigurationSettings.AppSettings["ServerPort"]);
             clientAppState.TCPClient = new TcpClient();
@@ -40,7 +48,6 @@ namespace SimpleClientApp
                 clientAppState.TCPClient.Client.Shutdown(SocketShutdown.Both);
                 clientAppState.TCPClient.Close();
             }
-
         }
 
         private static void AskForRegistration(ClientAppState clientAppState)

@@ -16,6 +16,11 @@ namespace SimpleClientApp
         private List<string> _availableUsers = new List<string>();
         private string _clientId = "Unnamed";
 
+        public ClientAppState(IClientUINotifier consoleNotifier)
+        {
+            this._clientUINotifier = consoleNotifier;
+        }
+
         public ConcurrentQueue<ClientMessage> ClientMessagesQueue { get => _clientMessagesQueue; set => _clientMessagesQueue = value; }
         public IClientUINotifier ClientUINotifier { get => _clientUINotifier; set => _clientUINotifier = value; }
         public List<string> AvailableUsers { get => _availableUsers; set => _availableUsers = value; }
