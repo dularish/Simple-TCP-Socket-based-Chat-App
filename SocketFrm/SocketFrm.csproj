@@ -46,6 +46,7 @@
     <Compile Include="ClientMessage.cs" />
     <Compile Include="DisplayTextServerMessage.cs" />
     <Compile Include="IClientUINotifier.cs" />
+    <Compile Include="IPeerMessageTransmitter.cs" />
     <Compile Include="IServerUINotifier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegisterIdClientMessage.cs" />

@@ -9,22 +9,17 @@ using System.Threading.Tasks;
 
 namespace SimpleClientApp
 {
-    internal class ClientAppState
+    internal class ClientAppState : IPeerMessageTransmitter
     {
         private ConcurrentQueue<ClientMessage> _clientMessagesQueue = new ConcurrentQueue<ClientMessage>();
-        private IClientUINotifier _clientUINotifier;
-        private List<string> _availableUsers = new List<string>();
-        private string _clientId = "Unnamed";
 
-        public ClientAppState(IClientUINotifier consoleNotifier)
+        internal ConcurrentQueue<ClientMessage> ClientMessagesQueue { get => _clientMessagesQueue; set => _clientMessagesQueue = value; }
+        
+        internal TcpClient TCPClient { get; set; }
+
+        public void QueueToTransmitPeerMessage(TransmitToPeerClientMessage clientMessage)
         {
-            this._clientUINotifier = consoleNotifier;
+            ClientMessagesQueue.Enqueue(clientMessage);
         }
-
-        public ConcurrentQueue<ClientMessage> ClientMessagesQueue { get => _clientMessagesQueue; set => _clientMessagesQueue = value; }
-        public IClientUINotifier ClientUINotifier { get => _clientUINotifier; set => _clientUINotifier = value; }
-        public List<string> AvailableUsers { get => _availableUsers; set => _availableUsers = value; }
-        public string ClientId { get => _clientId; set => _clientId = value; }
-        public TcpClient TCPClient { get; internal set; }
     }
 }

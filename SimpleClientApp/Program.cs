@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using SocketFrm;
 using System.Collections.Concurrent;
 using System.Timers;
+using System.Configuration;
 
 namespace SimpleClientApp
 {
@@ -16,30 +17,31 @@ namespace SimpleClientApp
     {
         static void Main(string[] args)
         {
-            ClientAppState clientAppState = new ClientAppState(new ConsoleNotifier());
-            ConnectWithServer(clientAppState);
+            ClientAppState clientAppState = new ClientAppState();
+            IClientUINotifier clientUINotifier = new ConsoleNotifier();
+            ConnectWithServer(clientAppState, clientUINotifier);
 
         }
         /// <summary>
         /// Blocking call to connect with server
         /// </summary>
         /// <param name="clientAppState"></param>
-        public static void ConnectWithServer(ClientAppState clientAppState)
+        public static void ConnectWithServer(ClientAppState clientAppState, IClientUINotifier clientUINotifier)
         {
-            IPAddress serverIP = IPAddress.Parse(System.Configuration.ConfigurationSettings.AppSettings["ServerIP"]);
-            int serverPort = Int32.Parse(System.Configuration.ConfigurationSettings.AppSettings["ServerPort"]);
+            IPAddress serverIP = IPAddress.Parse(ConfigurationManager.AppSettings["ServerIP"]);
+            int serverPort = Int32.Parse(ConfigurationManager.AppSettings["ServerPort"]);
             clientAppState.TCPClient = new TcpClient();
             clientAppState.TCPClient.Connect(new IPEndPoint(serverIP, serverPort));
             try
             {
                 //writeSimpleStringToStream(tcpClient);
                 //writeSimpleCommandToStream(tcpClient);
-                Task readStreamTask = new Task((someClientAppState) => ReadStream(someClientAppState as ClientAppState), clientAppState);
+                Task readStreamTask = new Task(() => ReadStream(clientAppState, clientUINotifier));
                 readStreamTask.Start();
                 Task writeStreamTask = new Task((someClientAppState) => WriteStream(someClientAppState as ClientAppState), clientAppState);
                 writeStreamTask.Start();
                 //Task.Run(() => RandomlyQueueClientMessages());
-                Task.Run(() => { AskForRegistration(clientAppState); ContinuouslyGetInputFromUser(clientAppState); });
+                Task.Run(() => { AskForRegistration(clientAppState, clientUINotifier); });
 
                 Task.WhenAny(new List<Task>() { readStreamTask, writeStreamTask }).Wait();
             }
@@ -50,84 +52,20 @@ namespace SimpleClientApp
             }
         }
 
-        private static void AskForRegistration(ClientAppState clientAppState)
+        private static void AskForRegistration(ClientAppState clientAppState, IClientUINotifier clientUINotifier)
         {
+            string validationErrorMessage = string.Empty;
             while (true)
             {
-                Console.WriteLine("Enter your desired registration Id :");
-                string registrationId = Console.ReadLine();
+                string registrationId = clientUINotifier.GetRegistrationId(validationErrorMessage);
                 if ((registrationId?.Length ?? 0) > 5)
                 {
                     clientAppState.ClientMessagesQueue.Enqueue(new RegisterIdClientMessage(registrationId));
-                    clientAppState.ClientId = registrationId;//have to avoid this later
                     break;
                 }
                 else
                 {
-                    Console.WriteLine("Enter a valid registration Id.");
-                }
-            }
-        }
-
-        private static void ContinuouslyGetInputFromUser(ClientAppState clientAppState)
-        {
-            while (true)
-            {
-                Console.Clear();
-                Console.WriteLine("1. See available registered clients");
-                Console.WriteLine("2. Send text message");
-                Console.WriteLine("Enter the choice : ");
-                ConsoleKeyInfo choice = Console.ReadKey();
-
-                switch (choice.KeyChar)
-                {
-                    case '1':
-                        if(clientAppState.AvailableUsers.Count > 0)
-                        {
-                            Console.WriteLine(clientAppState.AvailableUsers.Aggregate((x, y) => x + "\n" + y));
-                        }
-                        else
-                        {
-                            Console.WriteLine(string.Empty);
-                        }
-                        break;
-                    case '2':
-                        if (string.IsNullOrEmpty(clientAppState.ClientId))
-                        {
-                            Console.WriteLine("Please get the user registerred before proceeding");
-                        }
-                        while (true)
-                        {
-                            Console.WriteLine("Enter the receiver clientId : (Enter \"!!Back\" to go one step back)");
-                            string receiverClientId = Console.ReadLine();
-                            if(receiverClientId == "!!Back")
-                            {
-                                break;
-                            }
-                            if (clientAppState.AvailableUsers.Contains(receiverClientId))
-                            {
-                                Console.WriteLine("Continue entering the messages (Enter \"!!Back\" to go one step back)");
-                                while (true)
-                                {
-                                    string message = Console.ReadLine();
-                                    if (message == "!!Back")
-                                    {
-                                        break;
-                                    }
-                                    if (!string.IsNullOrEmpty(message))
-                                    {
-                                        clientAppState.ClientMessagesQueue.Enqueue(new TransmitToPeerClientMessage(message, receiverClientId, clientAppState.ClientId, 1));
-                                    }
-                                    else
-                                    {
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                    default:
-                        break;
+                    validationErrorMessage = "Enter a valid registration Id.";
                 }
             }
         }
@@ -176,7 +114,7 @@ namespace SimpleClientApp
             Console.ReadKey();
         }
 
-        private static void ReadStream(ClientAppState clientAppState)
+        private static void ReadStream(ClientAppState clientAppState, IClientUINotifier clientUINotifier)
         {
             var tcpClient = clientAppState.TCPClient;
             NetworkStream networkStream = tcpClient.GetStream();
@@ -189,7 +127,7 @@ namespace SimpleClientApp
                     {
                         ServerMessage serverMessage = ServerMessage.Deserialize(networkStream);
 
-                        handleServerMessage(serverMessage, clientAppState);
+                        handleServerMessage(serverMessage, clientUINotifier, clientAppState);
                     }
                 }
                 catch(IOException ioEx)
@@ -213,49 +151,28 @@ namespace SimpleClientApp
             Console.ReadKey();
         }
 
-        private static void handleServerMessage(ServerMessage serverMessage, ClientAppState clientAppState)
+        private static void handleServerMessage(ServerMessage serverMessage, IClientUINotifier clientUINotifier, IPeerMessageTransmitter clientAppState)
         {
             switch (serverMessage.ServerMessageType)
             {
                 case ServerMessageType.DisplayTextToConsole:
-                    clientAppState.ClientUINotifier.HandleDisplayTextServerMessage(serverMessage as DisplayTextServerMessage);
+                    clientUINotifier.HandleDisplayTextServerMessage(serverMessage as DisplayTextServerMessage);
                     break;
                 case ServerMessageType.RegisterIdResult:
-                    clientAppState.ClientUINotifier.HandleRegisterIDResultServerMessage(serverMessage as RegisterIdResultServerMessage);
-                    handleRegisterIDResultServerMessage(serverMessage as RegisterIdResultServerMessage, clientAppState);
+                    IPeerMessageTransmitter peerMessageTransmitter = (serverMessage as RegisterIdResultServerMessage)?.Result ?? false ? clientAppState : null;
+                    clientUINotifier.HandleRegisterIDResultServerMessage(serverMessage as RegisterIdResultServerMessage, peerMessageTransmitter);
                     break;
                 case ServerMessageType.ClientAvailabilityNotification:
-                    clientAppState.ClientUINotifier.HandleClientAvailabilityNotificationServerMessage(serverMessage as ClientAvailabilityNotificationServerMessage);
-                    handleClientAvailabilityNotificationServerMessage(serverMessage as ClientAvailabilityNotificationServerMessage, clientAppState);
+                    clientUINotifier.HandleClientAvailabilityNotificationServerMessage(serverMessage as ClientAvailabilityNotificationServerMessage);
                     break;
                 case ServerMessageType.TransmitToPeerResult:
-                    clientAppState.ClientUINotifier.HandleTransmitToPeerResultServerMessage(serverMessage as TransmitToPeerResultServerMessage);
+                    clientUINotifier.HandleTransmitToPeerResultServerMessage(serverMessage as TransmitToPeerResultServerMessage);
                     break;
                 case ServerMessageType.TransmitToPeer:
-                    clientAppState.ClientUINotifier.HandleTransmitToPeeServerMessage(serverMessage as TransmitToPeerServerMessage);
+                    clientUINotifier.HandleTransmitToPeeServerMessage(serverMessage as TransmitToPeerServerMessage);
                     break;
                 default:
                     break;
-            }
-        }
-
-        private static void handleRegisterIDResultServerMessage(RegisterIdResultServerMessage registerIdResultServerMessage, ClientAppState clientAppState)
-        {
-            if (!registerIdResultServerMessage.Result)
-            {
-                clientAppState.ClientId = string.Empty;
-            }
-        }
-
-        private static void handleClientAvailabilityNotificationServerMessage(ClientAvailabilityNotificationServerMessage clientAvailabilityNotificationServerMessage, ClientAppState clientAppState)
-        {
-            if (clientAvailabilityNotificationServerMessage.IsAvailable)
-            {
-                clientAppState.AvailableUsers.Add(clientAvailabilityNotificationServerMessage.ClientUniqueId);
-            }
-            else
-            {
-                clientAppState.AvailableUsers.Remove(clientAvailabilityNotificationServerMessage.ClientUniqueId);
             }
         }
 
