@@ -16,6 +16,5 @@ namespace SocketFrm
         void HandleClientAvailabilityNotificationServerMessage(ClientAvailabilityNotificationServerMessage clientAvailabilityNotificationServerMessage);
         void HandleTransmitToPeerResultServerMessage(TransmitToPeerResultServerMessage transmitToPeerResultServerMessage);
         void HandleTransmitToPeeServerMessage(TransmitToPeerServerMessage transmitToPeerServerMessage);
-        void RequestRegistrationIdFromUser();
     }
 }
