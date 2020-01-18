@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleClientApp", "SimpleCl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketFrm", "SocketFrm\SocketFrm.csproj", "{6DEACB7E-2855-4E43-A3E5-6D7186213CE4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientDesktopUI", "ClientDesktopUI\ClientDesktopUI.csproj", "{D894405D-10DB-4FB5-A777-6DE66FC58295}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{6DEACB7E-2855-4E43-A3E5-6D7186213CE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6DEACB7E-2855-4E43-A3E5-6D7186213CE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6DEACB7E-2855-4E43-A3E5-6D7186213CE4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D894405D-10DB-4FB5-A777-6DE66FC58295}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D894405D-10DB-4FB5-A777-6DE66FC58295}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D894405D-10DB-4FB5-A777-6DE66FC58295}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D894405D-10DB-4FB5-A777-6DE66FC58295}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
