@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SimpleClientApp
@@ -11,9 +12,13 @@ namespace SimpleClientApp
     {
         private List<string> _availableUsers = new List<string>();
         private string _clientId = "Unnamed";
+        private AutoResetEvent _clientWantsShutdown = new AutoResetEvent(false);
 
+        internal Action<string> RegistrationService { get; set; }
         public List<string> AvailableUsers { get => _availableUsers; set => _availableUsers = value; }
         public string ClientId { get => _clientId; set => _clientId = value; }
+
+        public AutoResetEvent ClientWantsShutdown => _clientWantsShutdown;
 
         public void HandleDisplayTextServerMessage(DisplayTextServerMessage displayTextServerMessage)
         {
@@ -32,6 +37,7 @@ namespace SimpleClientApp
                 Console.WriteLine("Registration failed. Please try another ID");
 
                 ClientId = string.Empty;
+                RequestRegistrationIdFromUser();
             }
         }
 
@@ -60,24 +66,13 @@ namespace SimpleClientApp
             Console.WriteLine(transmitToPeerServerMessage.TransmitToPeerClientMessage.SenderClientId + " : " + transmitToPeerServerMessage.TransmitToPeerClientMessage.TextMessage);
         }
 
-        public string GetRegistrationId(string validationErrorMessage)
-        {
-            if (!string.IsNullOrEmpty(validationErrorMessage))
-            {
-                Console.WriteLine(validationErrorMessage);
-            }
-            Console.WriteLine("Enter the loginId that you would like to identify yourself with");
-            string registrationId = Console.ReadLine();
-            ClientId = registrationId;
-            return registrationId;
-        }
-
         private void startListeningToUI(IPeerMessageTransmitter peerMessageTransmitter)
         {
             while (true)
             {
                 Console.WriteLine("1. See available registered clients");
                 Console.WriteLine("2. Send text message");
+                Console.WriteLine("3. Close the application");
                 Console.WriteLine("Enter the choice : ");
                 ConsoleKeyInfo choice = Console.ReadKey();
 
@@ -128,10 +123,21 @@ namespace SimpleClientApp
                             }
                         }
                         break;
+                    case '3':
+                        ClientWantsShutdown?.Set();
+                        break;
                     default:
                         break;
                 }
             }
+        }
+
+        public void RequestRegistrationIdFromUser()
+        {
+            Console.WriteLine("Enter the loginId that you would like to identify yourself with");
+            string registrationId = Console.ReadLine();
+            ClientId = registrationId;
+            RegistrationService?.Invoke(registrationId);
         }
     }
 }

@@ -15,62 +15,71 @@ namespace SimpleClientApp
 {
     class Program
     {
+        private static bool _isRegistrationInProcess = false;
+        private static ClientAppState _clientAppState;
         static void Main(string[] args)
         {
-            ClientAppState clientAppState = new ClientAppState();
-            IClientUINotifier clientUINotifier = new ConsoleNotifier();
-            ConnectWithServer(clientAppState, clientUINotifier);
-
+            ConsoleNotifier clientUINotifier = new ConsoleNotifier();
+            Action<string> registrationService;
+            Task serverConnectionTask = ConnectWithServer(clientUINotifier, out registrationService);
+            clientUINotifier.RegistrationService = registrationService;
+            clientUINotifier.RequestRegistrationIdFromUser();
+            serverConnectionTask.Wait();
         }
         /// <summary>
-        /// Blocking call to connect with server
+        /// Task that can be waited till the termination of connection
         /// </summary>
         /// <param name="clientAppState"></param>
-        public static void ConnectWithServer(ClientAppState clientAppState, IClientUINotifier clientUINotifier)
+        public static Task ConnectWithServer(IClientUINotifier clientUINotifier, out Action<string> registrationService)
         {
+            ClientAppState clientAppState = new ClientAppState();
             IPAddress serverIP = IPAddress.Parse(ConfigurationManager.AppSettings["ServerIP"]);
             int serverPort = Int32.Parse(ConfigurationManager.AppSettings["ServerPort"]);
             clientAppState.TCPClient = new TcpClient();
             clientAppState.TCPClient.Connect(new IPEndPoint(serverIP, serverPort));
-            try
-            {
-                //writeSimpleStringToStream(tcpClient);
-                //writeSimpleCommandToStream(tcpClient);
-                Task readStreamTask = new Task(() => ReadStream(clientAppState, clientUINotifier));
-                readStreamTask.Start();
-                Task writeStreamTask = new Task((someClientAppState) => WriteStream(someClientAppState as ClientAppState), clientAppState);
-                writeStreamTask.Start();
-                //Task.Run(() => RandomlyQueueClientMessages());
-                Task.Run(() => { AskForRegistration(clientAppState, clientUINotifier); });
-
-                Task.WhenAny(new List<Task>() { readStreamTask, writeStreamTask }).Wait();
-            }
-            finally
-            {
-                clientAppState.TCPClient.Client.Shutdown(SocketShutdown.Both);
-                clientAppState.TCPClient.Close();
-            }
+            
+            //writeSimpleStringToStream(tcpClient);
+            //writeSimpleCommandToStream(tcpClient);
+            Task readStreamTask = new Task(() => readStream(clientAppState, clientUINotifier));
+            readStreamTask.Start();
+            Task writeStreamTask = new Task((someClientAppState) => writeStream(someClientAppState as ClientAppState), clientAppState);
+            writeStreamTask.Start();
+            Task shutDownWaitTask = new Task(() => clientUINotifier.ClientWantsShutdown.WaitOne());
+            shutDownWaitTask.Start();
+            //Task.Run(() => RandomlyQueueClientMessages());
+            //Task.Run(() => { AskForRegistration(clientUINotifier); });
+            _clientAppState = clientAppState;
+            registrationService = submitRegistrationRequest;
+            return Task.WhenAny(new List<Task>() { readStreamTask, writeStreamTask, shutDownWaitTask })
+                .ContinueWith(x => 
+                    {
+                        clientAppState.TCPClient.Client.Shutdown(SocketShutdown.Both);
+                        clientAppState.TCPClient.Close();
+                    });
+            
         }
 
-        private static void AskForRegistration(ClientAppState clientAppState, IClientUINotifier clientUINotifier)
+        private static void submitRegistrationRequest(string registrationId)
         {
-            string validationErrorMessage = string.Empty;
-            while (true)
+            if (!_isRegistrationInProcess)
             {
-                string registrationId = clientUINotifier.GetRegistrationId(validationErrorMessage);
-                if ((registrationId?.Length ?? 0) > 5)
+                if(registrationId.Length > 4)
                 {
-                    clientAppState.ClientMessagesQueue.Enqueue(new RegisterIdClientMessage(registrationId));
-                    break;
+                    _clientAppState?.ClientMessagesQueue.Enqueue(new RegisterIdClientMessage(registrationId));
+                    _isRegistrationInProcess = true;
                 }
                 else
                 {
-                    validationErrorMessage = "Enter a valid registration Id.";
+                    throw new Exception("Registration Id is too short");
                 }
+            }
+            else
+            {
+                throw new Exception("Registration request already submitted");
             }
         }
 
-        private static void WriteStream(ClientAppState clientAppState)
+        private static void writeStream(ClientAppState clientAppState)
         {
             var tcpClient = clientAppState.TCPClient;
             var clientMessagesQueue = clientAppState.ClientMessagesQueue;
@@ -114,7 +123,7 @@ namespace SimpleClientApp
             Console.ReadKey();
         }
 
-        private static void ReadStream(ClientAppState clientAppState, IClientUINotifier clientUINotifier)
+        private static void readStream(ClientAppState clientAppState, IClientUINotifier clientUINotifier)
         {
             var tcpClient = clientAppState.TCPClient;
             NetworkStream networkStream = tcpClient.GetStream();
@@ -151,7 +160,7 @@ namespace SimpleClientApp
             Console.ReadKey();
         }
 
-        private static void handleServerMessage(ServerMessage serverMessage, IClientUINotifier clientUINotifier, IPeerMessageTransmitter clientAppState)
+        private static void handleServerMessage(ServerMessage serverMessage, IClientUINotifier clientUINotifier, ClientAppState clientAppState)
         {
             switch (serverMessage.ServerMessageType)
             {
@@ -159,8 +168,15 @@ namespace SimpleClientApp
                     clientUINotifier.HandleDisplayTextServerMessage(serverMessage as DisplayTextServerMessage);
                     break;
                 case ServerMessageType.RegisterIdResult:
-                    IPeerMessageTransmitter peerMessageTransmitter = (serverMessage as RegisterIdResultServerMessage)?.Result ?? false ? clientAppState : null;
-                    clientUINotifier.HandleRegisterIDResultServerMessage(serverMessage as RegisterIdResultServerMessage, peerMessageTransmitter);
+                    try
+                    {
+                        IPeerMessageTransmitter peerMessageTransmitter = (serverMessage as RegisterIdResultServerMessage)?.Result ?? false ? clientAppState : null;
+                        clientUINotifier.HandleRegisterIDResultServerMessage(serverMessage as RegisterIdResultServerMessage, peerMessageTransmitter);
+                    }
+                    finally
+                    {
+                        _isRegistrationInProcess = false;
+                    }
                     break;
                 case ServerMessageType.ClientAvailabilityNotification:
                     clientUINotifier.HandleClientAvailabilityNotificationServerMessage(serverMessage as ClientAvailabilityNotificationServerMessage);
