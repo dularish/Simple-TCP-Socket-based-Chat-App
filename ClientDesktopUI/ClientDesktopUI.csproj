@@ -109,6 +109,10 @@
       <Project>{0b9c272d-49c7-45c6-8693-d2323d6da3ae}</Project>
       <Name>SimpleClientApp</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SocketFrm\SocketFrm.csproj">
+      <Project>{6DEACB7E-2855-4E43-A3E5-6D7186213CE4}</Project>
+      <Name>SocketFrm</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

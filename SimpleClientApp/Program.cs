@@ -13,7 +13,7 @@ using System.Configuration;
 
 namespace SimpleClientApp
 {
-    class Program
+    public class ChatClientProgram
     {
         private static bool _isRegistrationInProcess = false;
         private static ClientAppState _clientAppState;
@@ -135,29 +135,28 @@ namespace SimpleClientApp
                     if (networkStream.DataAvailable)
                     {
                         ServerMessage serverMessage = ServerMessage.Deserialize(networkStream);
-
+                        
                         handleServerMessage(serverMessage, clientUINotifier, clientAppState);
                     }
                 }
                 catch(IOException ioEx)
                 {
-                    Console.WriteLine("Server was forcibly closed during the read process.. :(");
-                    Console.WriteLine("Message : " + ioEx.Message);
+                    clientUINotifier.HandleDisplayTextServerMessage( new DisplayTextServerMessage("Server was forcibly closed during the read process.. :("));
+                    clientUINotifier.HandleDisplayTextServerMessage(new DisplayTextServerMessage("Message : " + ioEx.Message));
                     break;
                 }
                 catch (InvalidOperationException iopEx)
                 {
-                    Console.WriteLine("Write process : Server had forcibly close the connection before .. :(");
-                    Console.WriteLine("Message : " + iopEx.Message);
+                    clientUINotifier.HandleDisplayTextServerMessage(new DisplayTextServerMessage("Write process : Server had forcibly close the connection before .. :("));
+                    clientUINotifier.HandleDisplayTextServerMessage(new DisplayTextServerMessage("Message : " + iopEx.Message));
                     break;
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.GetType().ToString() + "\n" + ex.Message + "\n" + ex.StackTrace);
+                    clientUINotifier.HandleDisplayTextServerMessage(new DisplayTextServerMessage(ex.GetType().ToString() + "\n" + ex.Message + "\n" + ex.StackTrace));
                     break;
                 }
             }
-            Console.ReadKey();
         }
 
         private static void handleServerMessage(ServerMessage serverMessage, IClientUINotifier clientUINotifier, ClientAppState clientAppState)
@@ -185,7 +184,7 @@ namespace SimpleClientApp
                     clientUINotifier.HandleTransmitToPeerResultServerMessage(serverMessage as TransmitToPeerResultServerMessage);
                     break;
                 case ServerMessageType.TransmitToPeer:
-                    clientUINotifier.HandleTransmitToPeeServerMessage(serverMessage as TransmitToPeerServerMessage);
+                    clientUINotifier.HandleTransmitToPeerServerMessage(serverMessage as TransmitToPeerServerMessage);
                     break;
                 default:
                     break;

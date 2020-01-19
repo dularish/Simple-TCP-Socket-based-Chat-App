@@ -12,6 +12,7 @@ namespace ClientDesktopUI.ViewModels
     public class PeerDataViewModel : INotifyPropertyChanged
     {
         private string _PeerName;
+        private bool _IsAvailable;
 
         private ObservableCollection<string> _ChatMessages = new ObservableCollection<string>();
 
@@ -33,6 +34,15 @@ namespace ClientDesktopUI.ViewModels
             }
         }
 
+        public bool IsAvailable
+        {
+            get => _IsAvailable; set
+            {
+                _IsAvailable = value;
+                onPropertyChanged();
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void onPropertyChanged([CallerMemberName]string propertyName = "")
@@ -40,11 +50,10 @@ namespace ClientDesktopUI.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public PeerDataViewModel(string peerName)
+        public PeerDataViewModel(string peerName, bool isAvailable = true)
         {
             PeerName = peerName;
-            ChatMessages.Add(peerName + " says hello");
-            ChatMessages.Add(peerName + " says goodbye");
+            IsAvailable = isAvailable;
         }
     }
 }

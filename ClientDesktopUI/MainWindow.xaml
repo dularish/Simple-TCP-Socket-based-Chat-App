@@ -33,7 +33,7 @@
             <ListView Grid.Row="0" x:Name="_PeerMessagesListView" ItemsSource="{Binding ElementName=_PeersList, Path=SelectedItem.ChatMessages}" >
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
-                        <Setter Property="Margin" Value="10,20,10,10" />
+                        <Setter Property="Margin" Value="10,10,10,0" />
                     </Style>
                 </ListView.ItemContainerStyle>
             </ListView>

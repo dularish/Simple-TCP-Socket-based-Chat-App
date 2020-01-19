@@ -61,7 +61,7 @@ namespace SimpleClientApp
             //doing nothing
         }
 
-        public void HandleTransmitToPeeServerMessage(TransmitToPeerServerMessage transmitToPeerServerMessage)
+        public void HandleTransmitToPeerServerMessage(TransmitToPeerServerMessage transmitToPeerServerMessage)
         {
             Console.WriteLine(transmitToPeerServerMessage.TransmitToPeerClientMessage.SenderClientId + " : " + transmitToPeerServerMessage.TransmitToPeerClientMessage.TextMessage);
         }
