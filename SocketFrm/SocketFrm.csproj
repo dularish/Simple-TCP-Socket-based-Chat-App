@@ -42,20 +42,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DisplayTextClientMessage.cs" />
-    <Compile Include="ClientMessage.cs" />
-    <Compile Include="DisplayTextServerMessage.cs" />
+    <Compile Include="ClientMessageTypes\DisplayTextClientMessage.cs" />
+    <Compile Include="ClientMessageTypes\ClientMessage.cs" />
+    <Compile Include="ServerMessageTypes\DisplayTextServerMessage.cs" />
     <Compile Include="IClientUINotifier.cs" />
     <Compile Include="IPeerMessageTransmitter.cs" />
     <Compile Include="IServerUINotifier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RegisterIdClientMessage.cs" />
-    <Compile Include="RegisterIdResultServerMessage.cs" />
-    <Compile Include="ClientAvailabilityNotificationServerMessage.cs" />
-    <Compile Include="ServerMessage.cs" />
-    <Compile Include="TransmitToPeerClientMessage.cs" />
-    <Compile Include="TransmitToPeerResultServerMessage.cs" />
-    <Compile Include="TransmitToPeerServerMessage.cs" />
+    <Compile Include="ClientMessageTypes\RegisterIdClientMessage.cs" />
+    <Compile Include="ServerMessageTypes\RegisterIdResultServerMessage.cs" />
+    <Compile Include="ServerMessageTypes\ClientAvailabilityNotificationServerMessage.cs" />
+    <Compile Include="ServerMessageTypes\ServerMessage.cs" />
+    <Compile Include="ClientMessageTypes\TransmitToPeerClientMessage.cs" />
+    <Compile Include="ServerMessageTypes\TransmitToPeerResultServerMessage.cs" />
+    <Compile Include="ServerMessageTypes\TransmitToPeerServerMessage.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -38,16 +38,12 @@ namespace SimpleClientApp
             clientAppState.TCPClient = new TcpClient();
             clientAppState.TCPClient.Connect(new IPEndPoint(serverIP, serverPort));
             
-            //writeSimpleStringToStream(tcpClient);
-            //writeSimpleCommandToStream(tcpClient);
             Task readStreamTask = new Task(() => readStream(clientAppState, clientUINotifier));
             readStreamTask.Start();
             Task writeStreamTask = new Task((someClientAppState) => writeStream(someClientAppState as ClientAppState), clientAppState);
             writeStreamTask.Start();
             Task shutDownWaitTask = new Task(() => clientUINotifier.ClientWantsShutdown.WaitOne());
             shutDownWaitTask.Start();
-            //Task.Run(() => RandomlyQueueClientMessages());
-            //Task.Run(() => { AskForRegistration(clientUINotifier); });
             _clientAppState = clientAppState;
             registrationService = submitRegistrationRequest;
             return Task.WhenAny(new List<Task>() { readStreamTask, writeStreamTask, shutDownWaitTask })
@@ -189,33 +185,6 @@ namespace SimpleClientApp
                 default:
                     break;
             }
-        }
-
-        private static void writeSimpleCommandToStream(TcpClient tcpClient)
-        {
-            DisplayTextClientMessage displayTextSocketCommand = new DisplayTextClientMessage("Some simple string");
-
-            NetworkStream networkStream = tcpClient.GetStream();
-
-            byte[] dataBuffer = displayTextSocketCommand.Serialize(out int dataLength);
-
-            //byte[] writeBuffer = new byte[sizeof(int)];
-            //writeBuffer = BitConverter.GetBytes((int)dataLength);
-            //networkStream.Write(writeBuffer, 0, sizeof(int));
-            //networkStream.Flush();
-
-            networkStream.Write(dataBuffer, 0, dataLength);
-            networkStream.Flush();
-
-            networkStream.Close();
-        }
-
-        private static void writeSimpleStringToStream(TcpClient tcpClient)
-        {
-            NetworkStream networkStream = tcpClient.GetStream();
-            StreamWriter streamWriter = new StreamWriter(networkStream) { AutoFlush = true };
-            streamWriter.Write("Hello from client");
-            networkStream.Close();
         }
 
         private static string getLocalIPAddress()

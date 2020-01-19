@@ -44,7 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="ChatClientProgram.cs" />
     <Compile Include="ClientAppState.cs" />
     <Compile Include="ConsoleNotifier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
