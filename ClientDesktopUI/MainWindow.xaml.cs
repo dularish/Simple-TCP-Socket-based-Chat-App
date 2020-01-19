@@ -43,7 +43,12 @@ namespace ClientDesktopUI
             }
 
             this.Loaded += MainWindow_Loaded;
-            
+            this.Closing += MainWindow_Closing;
+        }
+
+        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            ClientWantsShutdown.Set();
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -113,18 +118,47 @@ namespace ClientDesktopUI
             Dispatcher.Invoke(() =>
             {
                 PeersListViewModel.AddMessage(transmitToPeerServerMessage.TransmitToPeerClientMessage.SenderClientId, transmitToPeerServerMessage.TransmitToPeerClientMessage.TextMessage, MessageFrom.Them);
+
+                alertUserIfNeeded();
             });
         }
 
+        private void alertUserIfNeeded()
+        {
+            if (!WindowsHelper.IsApplicationActive())
+            {
+                System.Media.SystemSounds.Beep.Play();
+                WindowsHelper.FlashWindow(this);
+            }
+        }
+
         private void _SendBtn_Click(object sender, RoutedEventArgs e)
+        {
+            sendMessage();
+        }
+
+        private void sendMessage()
         {
             if (!string.IsNullOrWhiteSpace(_CurrentMessageTextBox.Text))
             {
                 PeersListViewModel.AddMessage((_PeersList.SelectedItem as PeerDataViewModel)?.PeerName ?? string.Empty, _CurrentMessageTextBox.Text.Trim(), MessageFrom.Me);
 
-                _PeerMessageTransmitter.QueueToTransmitPeerMessage(new TransmitToPeerClientMessage(_CurrentMessageTextBox.Text.Trim(), (_PeersList.SelectedItem as PeerDataViewModel)?.PeerName ?? string.Empty, _ClientRegistrationId , 1));
+                _PeerMessageTransmitter.QueueToTransmitPeerMessage(new TransmitToPeerClientMessage(_CurrentMessageTextBox.Text.Trim(), (_PeersList.SelectedItem as PeerDataViewModel)?.PeerName ?? string.Empty, _ClientRegistrationId, 1));
             }
             _CurrentMessageTextBox.Clear();
+        }
+
+        private void _CurrentMessageTextBox_KeyUp(object sender, KeyEventArgs e)
+        {
+            if(((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift) && e.Key == Key.Enter)
+            {
+                _CurrentMessageTextBox.Text += "\n";
+                _CurrentMessageTextBox.CaretIndex = _CurrentMessageTextBox.Text.Length;
+            }
+            else if(e.Key == Key.Enter)
+            {
+                sendMessage();
+            }
         }
     }
 }

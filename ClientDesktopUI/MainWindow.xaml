@@ -39,7 +39,7 @@
             </ListView>
             <DockPanel Grid.Row="1" LastChildFill="True">
                 <Button DockPanel.Dock="Right" x:Name="_SendBtn" Content="Send" Width="100" IsEnabled="{Binding ElementName=_PeersList, Path=SelectedItem, Converter={StaticResource ListViewSelItemToBoolConv}}" Click="_SendBtn_Click" />
-                <TextBox x:Name="_CurrentMessageTextBox" />
+                <TextBox x:Name="_CurrentMessageTextBox" KeyUp="_CurrentMessageTextBox_KeyUp" MaxLines="5" />
             </DockPanel>
         </Grid>
     </Grid>
