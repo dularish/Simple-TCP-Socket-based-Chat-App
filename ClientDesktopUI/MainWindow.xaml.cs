@@ -42,6 +42,12 @@ namespace ClientDesktopUI
                 MessageBox.Show("Could not connect with server", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
+            this.Loaded += MainWindow_Loaded;
+            
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
             RequestRegistrationIdFromUser();
         }
 
