@@ -113,18 +113,23 @@ namespace SocketServerApp
                     {
                         try
                         {
-                            NetworkStream networkStream = tcpClient.GetStream();
+                            if (tcpClient.Connected)
+                            {
+                                NetworkStream networkStream = tcpClient.GetStream();
 
-                            byte[] bufferData = serverMessage.Serialize(out int dataLength);
+                                byte[] bufferData = serverMessage.Serialize(out int dataLength);
 
-                            networkStream.Write(bufferData, 0, dataLength);
-                            networkStream.Flush();
-
+                                networkStream.Write(bufferData, 0, dataLength);
+                                networkStream.Flush();
+                            }
+                            else
+                            {
+                                ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(this));
+                                break;
+                            }
                         }
                         catch (IOException ioEx)
                         {
-                            Console.WriteLine("The client was forcibly closed during the write process.. :(");
-                            Console.WriteLine("Message : " + ioEx.Message + "\nStackTrace : " + ioEx.StackTrace + "\n\n");
                             ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(this));
                             break;
                         }
@@ -148,23 +153,32 @@ namespace SocketServerApp
 
         private void ReadStream(TcpClient tcpClient)
         {
-            NetworkStream networkStream = tcpClient.GetStream();
+            
 
             while (true)
             {
                 try
                 {
-                    if (networkStream.DataAvailable)
+                    if (tcpClient.Connected)
                     {
-                        ClientMessage clientMessage = ClientMessage.Deserialize(networkStream);
+                        NetworkStream networkStream = tcpClient.GetStream();
 
-                        handleClientMessage(clientMessage);
+                        if (networkStream.DataAvailable)
+                        {
+                            ClientMessage clientMessage = ClientMessage.Deserialize(networkStream);
+
+                            handleClientMessage(clientMessage);
+                        }
+                    }
+                    else
+                    {
+                        ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(this));
+                        break;
                     }
                 }
                 catch (IOException ioEx)
                 {
-                    Console.WriteLine("The client was forcibly closed during the read process.. :(");
-                    Console.WriteLine("Message : " + ioEx.Message);
+                    Console.WriteLine("IO exception during read process");
                     ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(this));
                     break;
                 }
