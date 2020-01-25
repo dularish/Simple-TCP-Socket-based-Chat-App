@@ -12,13 +12,13 @@ namespace SimpleClientApp
     {
         private List<string> _availableUsers = new List<string>();
         private string _clientId = "Unnamed";
-        private AutoResetEvent _clientWantsShutdown = new AutoResetEvent(false);
+        private ManualResetEvent _clientWantsShutdown = new ManualResetEvent(false);
 
         internal Action<string> RegistrationService { get; set; }
         public List<string> AvailableUsers { get => _availableUsers; set => _availableUsers = value; }
         public string ClientId { get => _clientId; set => _clientId = value; }
 
-        public AutoResetEvent ClientWantsShutdown => _clientWantsShutdown;
+        public ManualResetEvent ClientWantsShutdown => _clientWantsShutdown;
 
         public void HandleDisplayTextServerMessage(DisplayTextServerMessage displayTextServerMessage)
         {

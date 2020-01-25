@@ -9,7 +9,7 @@ namespace SocketFrm
 {
     public interface IClientUINotifier
     {
-        AutoResetEvent ClientWantsShutdown { get; }
+        ManualResetEvent ClientWantsShutdown { get; }
 
         void HandleDisplayTextServerMessage(DisplayTextServerMessage displayTextServerMessage);
         void HandleRegisterIDResultServerMessage(RegisterIdResultServerMessage registerIdResultServerMessage, IPeerMessageTransmitter clientAppState);

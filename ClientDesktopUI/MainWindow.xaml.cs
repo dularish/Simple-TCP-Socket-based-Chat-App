@@ -26,7 +26,7 @@ namespace ClientDesktopUI
     {
         private string _ClientRegistrationId;
         private Action<string> _RegistrationService;
-        private AutoResetEvent _ClientWantsShutdown = new AutoResetEvent(false);
+        private ManualResetEvent _ClientWantsShutdown = new ManualResetEvent(false);
         private IPeerMessageTransmitter _PeerMessageTransmitter;
         public PeersListViewModel PeersListViewModel = new PeersListViewModel();
         public MainWindow()
@@ -67,7 +67,7 @@ namespace ClientDesktopUI
             clientRegistrationWindow.Show();
         }
 
-        public AutoResetEvent ClientWantsShutdown => _ClientWantsShutdown;
+        public ManualResetEvent ClientWantsShutdown => _ClientWantsShutdown;
 
         public void HandleClientAvailabilityNotificationServerMessage(ClientAvailabilityNotificationServerMessage clientAvailabilityNotificationServerMessage)
         {

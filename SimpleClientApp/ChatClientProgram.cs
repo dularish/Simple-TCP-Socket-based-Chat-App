@@ -40,7 +40,7 @@ namespace SimpleClientApp
             
             Task readStreamTask = new Task(() => readStream(clientAppState, clientUINotifier));
             readStreamTask.Start();
-            Task writeStreamTask = new Task((someClientAppState) => writeStream(someClientAppState as ClientAppState), clientAppState);
+            Task writeStreamTask = new Task((someClientAppState) => writeStream(someClientAppState as ClientAppState, clientUINotifier), clientAppState);
             writeStreamTask.Start();
             Task shutDownWaitTask = new Task(() => clientUINotifier.ClientWantsShutdown.WaitOne());
             shutDownWaitTask.Start();
@@ -75,7 +75,7 @@ namespace SimpleClientApp
             }
         }
 
-        private static void writeStream(ClientAppState clientAppState)
+        private static void writeStream(ClientAppState clientAppState, IClientUINotifier clientUINotifier)
         {
             var tcpClient = clientAppState.TCPClient;
             var clientMessagesQueue = clientAppState.ClientMessagesQueue;
@@ -97,19 +97,25 @@ namespace SimpleClientApp
                         }
                         catch (IOException ioEx)
                         {
-                            Console.WriteLine("Server was forcibly closed during the write process.. :(");
-                            Console.WriteLine("Message : " + ioEx.Message);
+                            if (!clientUINotifier.ClientWantsShutdown.WaitOne(0))
+                            {
+                                clientUINotifier.HandleDisplayTextServerMessage(new DisplayTextServerMessage("Server was forcibly closed during the write process.. :("));
+                                clientUINotifier.HandleDisplayTextServerMessage(new DisplayTextServerMessage("Message : " + ioEx.Message));
+                            }
                             break;
                         }
                         catch(InvalidOperationException iopEx)
                         {
-                            Console.WriteLine("Read process : Server had forcibly close the connection before .. :(");
-                            Console.WriteLine("Message : " + iopEx.Message);
+                            if (!clientUINotifier.ClientWantsShutdown.WaitOne(0))
+                            {
+                                clientUINotifier.HandleDisplayTextServerMessage(new DisplayTextServerMessage("Read process : Server had forcibly close the connection before .. :("));
+                                clientUINotifier.HandleDisplayTextServerMessage(new DisplayTextServerMessage("Message : " + iopEx.Message));
+                            }
                             break;
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine(ex.GetType().ToString() + "\n" + ex.Message + "\n" + ex.StackTrace);
+                            clientUINotifier.HandleDisplayTextServerMessage(new DisplayTextServerMessage(ex.GetType().ToString() + "\n" + ex.Message + "\n" + ex.StackTrace));
                             
                             break;
                         }
@@ -137,14 +143,20 @@ namespace SimpleClientApp
                 }
                 catch(IOException ioEx)
                 {
-                    clientUINotifier.HandleDisplayTextServerMessage( new DisplayTextServerMessage("Server was forcibly closed during the read process.. :("));
-                    clientUINotifier.HandleDisplayTextServerMessage(new DisplayTextServerMessage("Message : " + ioEx.Message));
+                    if (!clientUINotifier.ClientWantsShutdown.WaitOne(0))
+                    {
+                        clientUINotifier.HandleDisplayTextServerMessage(new DisplayTextServerMessage("Server was forcibly closed during the read process.. :("));
+                        clientUINotifier.HandleDisplayTextServerMessage(new DisplayTextServerMessage("Message : " + ioEx.Message));
+                    }
                     break;
                 }
                 catch (InvalidOperationException iopEx)
                 {
-                    clientUINotifier.HandleDisplayTextServerMessage(new DisplayTextServerMessage("Write process : Server had forcibly close the connection before .. :("));
-                    clientUINotifier.HandleDisplayTextServerMessage(new DisplayTextServerMessage("Message : " + iopEx.Message));
+                    if (!clientUINotifier.ClientWantsShutdown.WaitOne(0))
+                    {
+                        clientUINotifier.HandleDisplayTextServerMessage(new DisplayTextServerMessage("Write process : Server had forcibly close the connection before .. :("));
+                        clientUINotifier.HandleDisplayTextServerMessage(new DisplayTextServerMessage("Message : " + iopEx.Message));
+                    }
                     break;
                 }
                 catch (Exception ex)
