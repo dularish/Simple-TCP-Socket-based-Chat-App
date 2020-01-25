@@ -1,4 +1,5 @@
 ﻿using SocketFrm;
+using SocketFrm.ServerMessageTypes;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -17,6 +18,7 @@ namespace SocketServerApp
         private IServerUINotifier _UINotifier;
         private ConcurrentQueue<ServerMessage> _serverMessagesQueue = new ConcurrentQueue<ServerMessage>();
         private Timer _serverMessagesQueueTimer;
+        private Timer _keepAliveTimer;
         private string _ID;
 
         public string ID { get => _ID; private set => _ID = value; }
@@ -30,6 +32,7 @@ namespace SocketServerApp
             this.tcpClient = tcpClient;
             _UINotifier = uiNotifier;
             ClientDisconnected += Client_ClientDisconnected;
+            initializeKeepAliveTimer();
             try
             {
                 Task readStreamTask = new Task((someTcpClientObj) => this.ReadStream(someTcpClientObj as TcpClient), tcpClient);
@@ -45,6 +48,24 @@ namespace SocketServerApp
             }
         }
 
+        private void initializeKeepAliveTimer()
+        {
+            if (_keepAliveTimer != null)
+            {
+                _keepAliveTimer.Stop();
+                _keepAliveTimer.Dispose();
+            }
+            _keepAliveTimer = new Timer(3000);
+            _keepAliveTimer.Elapsed += _keepAliveTimer_Elapsed; ;
+            _keepAliveTimer.Start();
+        }
+
+        private void _keepAliveTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            ServerMessage serverMessage = new KeepAliveServerMessage();
+            _serverMessagesQueue.Enqueue(serverMessage);
+        }
+
         /// <summary>
         /// Closes the running tasks on disconnection
         /// </summary>
@@ -52,6 +73,8 @@ namespace SocketServerApp
         /// <param name="e"></param>
         private void Client_ClientDisconnected(object sender, ClientDisconnectedEventArgs e)
         {
+            _keepAliveTimer?.Stop();
+            _keepAliveTimer?.Dispose();
             _serverMessagesQueueTimer?.Stop();
             _serverMessagesQueueTimer?.Dispose();
         }

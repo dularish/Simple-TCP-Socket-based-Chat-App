@@ -11,7 +11,7 @@ using System.Xml;
 
 namespace SocketFrm
 {
-    public enum ServerMessageType { DisplayTextToConsole, RegisterIdResult, ClientAvailabilityNotification, TransmitToPeerResult, TransmitToPeer }
+    public enum ServerMessageType { DisplayTextToConsole, RegisterIdResult, ClientAvailabilityNotification, TransmitToPeerResult, TransmitToPeer, KeepAlive }
 
     [Serializable]
     [DataContract]

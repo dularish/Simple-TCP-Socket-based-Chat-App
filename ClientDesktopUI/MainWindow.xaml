@@ -20,7 +20,20 @@
             <ListView.ItemTemplate>
                 <DataTemplate DataType="vm:PeerDataViewModel">
                     <WrapPanel>
-                        <TextBlock Text="{Binding PeerName}" />
+                        <Canvas Width="25" Height="20" >
+                            <Ellipse Canvas.Left="5" Canvas.Top="5" Height="10" Width="10" Stroke="LightSlateGray">
+                                <Ellipse.Style>
+                                    <Style TargetType="Ellipse">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsAvailable}" Value="True">
+                                                <Setter Property="Fill" Value="LightGreen" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
+                        </Canvas>
+                        <TextBlock Height="20" FontSize="15" Text="{Binding PeerName}" />
                     </WrapPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>

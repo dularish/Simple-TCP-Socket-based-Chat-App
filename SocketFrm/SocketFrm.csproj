@@ -50,6 +50,7 @@
     <Compile Include="IServerUINotifier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ClientMessageTypes\RegisterIdClientMessage.cs" />
+    <Compile Include="ServerMessageTypes\KeepAliveServerMessage.cs" />
     <Compile Include="ServerMessageTypes\RegisterIdResultServerMessage.cs" />
     <Compile Include="ServerMessageTypes\ClientAvailabilityNotificationServerMessage.cs" />
     <Compile Include="ServerMessageTypes\ServerMessage.cs" />
