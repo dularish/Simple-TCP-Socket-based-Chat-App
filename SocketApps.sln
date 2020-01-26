@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketFrm", "SocketFrm\Sock
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientDesktopUI", "ClientDesktopUI\ClientDesktopUI.csproj", "{D894405D-10DB-4FB5-A777-6DE66FC58295}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketServerWinService", "SocketServerWinService\SocketServerWinService.csproj", "{0E758BF9-5D90-4809-BC34-558242ECC6F4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{D894405D-10DB-4FB5-A777-6DE66FC58295}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D894405D-10DB-4FB5-A777-6DE66FC58295}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D894405D-10DB-4FB5-A777-6DE66FC58295}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E758BF9-5D90-4809-BC34-558242ECC6F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E758BF9-5D90-4809-BC34-558242ECC6F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E758BF9-5D90-4809-BC34-558242ECC6F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E758BF9-5D90-4809-BC34-558242ECC6F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

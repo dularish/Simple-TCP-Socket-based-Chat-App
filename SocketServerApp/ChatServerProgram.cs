@@ -10,24 +10,43 @@ using System.Threading.Tasks;
 
 namespace SocketServerApp
 {
-    class Program
+    public class ChatServerProgram
     {
         static void Main(string[] args)
         {
-            
-            ClientsManager clientsManager = new ClientsManager(new ConsoleNotifier());
+            IServerUINotifier serverUINotifier = new ConsoleNotifier();
+            Task tcpListenerStartTask = StartTCPListener(serverUINotifier);
+            tcpListenerStartTask.Wait();
+        }
+
+        /// <summary>
+        /// Returns a task that can be awaited for completion of ShutDown of Server
+        /// </summary>
+        /// <param name="serverUINotifier"></param>
+        /// <returns></returns>
+        public static Task StartTCPListener(IServerUINotifier serverUINotifier)
+        {
+            ClientsManager clientsManager = new ClientsManager(serverUINotifier);
             TcpListener tcpListener = new TcpListener(IPAddress.Any, 2060);
             tcpListener.Start();
 
-            while (true)
+            Action listenForNewConnections = new Action(() =>
             {
-                Console.WriteLine("Listening to socket...");
-                TcpClient tcpClient = tcpListener.AcceptTcpClient();
-                clientsManager.AcceptClient(tcpClient);
-                //Task socketHandlerTask = new Task(someTcpClient => handleTcpClient(someTcpClient as TcpClient), tcpClient);
-                //socketHandlerTask.ContinueWith((taskObj) => Console.WriteLine("\tFinished executing the socket handler."));
-                //socketHandlerTask.Start();
-            }
+                while (true)
+                {
+                    Console.WriteLine("Listening to socket...");
+                    TcpClient tcpClient = tcpListener.AcceptTcpClient();
+                    clientsManager.AcceptClient(tcpClient);
+                }
+            });
+
+            Task listenForNewConnectionsTask = new Task(listenForNewConnections);
+            listenForNewConnectionsTask.Start();
+            Task shutDownWaitTask = new Task(() => serverUINotifier.ServerWantsShutdown.WaitOne());
+            shutDownWaitTask.Start();
+
+            return Task.WhenAny(new List<Task>() { listenForNewConnectionsTask, shutDownWaitTask });
+            
         }
 
         private static void handleTcpClient(TcpClient tcpClient)

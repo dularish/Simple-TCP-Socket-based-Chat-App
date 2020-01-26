@@ -4,14 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F1230DC8-08FD-49F2-9F77-FBE2D9516523}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>SocketServerApp</RootNamespace>
-    <AssemblyName>SocketServerApp</AssemblyName>
+    <ProjectGuid>{0E758BF9-5D90-4809-BC34-558242ECC6F4}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>SocketServerWinService</RootNamespace>
+    <AssemblyName>SocketServerWinService</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
+    <Deterministic>false</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -32,21 +32,36 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>SocketServerWinService.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChatServerProgram.cs" />
-    <Compile Include="Client.cs" />
-    <Compile Include="ClientsManager.cs" />
-    <Compile Include="ConsoleNotifier.cs" />
+    <Compile Include="ChatServerService.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ChatServerService.Designer.cs">
+      <DependentUpon>ChatServerService.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="ProjectInstaller.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ProjectInstaller.Designer.cs">
+      <DependentUpon>ProjectInstaller.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -57,6 +72,21 @@
       <Project>{6DEACB7E-2855-4E43-A3E5-6D7186213CE4}</Project>
       <Name>SocketFrm</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SocketServerApp\SocketServerApp.csproj">
+      <Project>{F1230DC8-08FD-49F2-9F77-FBE2D9516523}</Project>
+      <Name>SocketServerApp</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ChatServerService.resx">
+      <DependentUpon>ChatServerService.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ProjectInstaller.resx">
+      <DependentUpon>ProjectInstaller.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ServiceInstructionsReadme.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
