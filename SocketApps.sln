@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientDesktopUI", "ClientDe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketServerWinService", "SocketServerWinService\SocketServerWinService.csproj", "{0E758BF9-5D90-4809-BC34-558242ECC6F4}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "ClientDesktopUISetup", "ClientDesktopUISetup\ClientDesktopUISetup.vdproj", "{7DE2E0D7-8BDC-4A27-956D-66FD7CA4714A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,8 @@ Global
 		{0E758BF9-5D90-4809-BC34-558242ECC6F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E758BF9-5D90-4809-BC34-558242ECC6F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E758BF9-5D90-4809-BC34-558242ECC6F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DE2E0D7-8BDC-4A27-956D-66FD7CA4714A}.Debug|Any CPU.ActiveCfg = Debug
+		{7DE2E0D7-8BDC-4A27-956D-66FD7CA4714A}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
