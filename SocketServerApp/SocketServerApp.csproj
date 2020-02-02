@@ -48,6 +48,8 @@
     <Compile Include="ClientsManager.cs" />
     <Compile Include="ConsoleNotifier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReadConnectionState.cs" />
+    <Compile Include="WriteConnectionState.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

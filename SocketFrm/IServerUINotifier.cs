@@ -15,5 +15,7 @@ namespace SocketFrm
         void HandleRegisterIDInServerMessage(RegisterIdClientMessage registerIdClientMessage);
         void HandleTransmitToPeerMessage(TransmitToPeerClientMessage transmitToPeerClientMessage);
         void NotifyClientDisconnection(string clientDisconnectedID);
+        void LogException(Exception exception, string exceptionMessage);
+        void LogText(string logMessage);
     }
 }

@@ -46,10 +46,17 @@ namespace SocketFrm
             int readBytes = networkStream.Read(dataSizeBytes, 0, 4);
             int dataSize = BitConverter.ToInt32(dataSizeBytes, 0);
 
-            
+
             BinaryReader binaryReader = new BinaryReader(networkStream);
             byte[] data = binaryReader.ReadBytes(dataSize);
+            message = Deserialize(data);
 
+            return message;
+        }
+
+        public static ClientMessage Deserialize(byte[] data)
+        {
+            ClientMessage message;
             using (MemoryStream ms = new MemoryStream(data))
             {
                 BinaryFormatter bf = new BinaryFormatter();
@@ -58,6 +65,5 @@ namespace SocketFrm
 
             return message;
         }
-
     }
 }

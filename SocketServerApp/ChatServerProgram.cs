@@ -34,7 +34,7 @@ namespace SocketServerApp
             {
                 while (true)
                 {
-                    Console.WriteLine("Listening to socket...");
+                    serverUINotifier.LogText("Listening to socket...");
                     TcpClient tcpClient = tcpListener.AcceptTcpClient();
                     clientsManager.AcceptClient(tcpClient);
                 }
@@ -47,53 +47,6 @@ namespace SocketServerApp
 
             return Task.WhenAny(new List<Task>() { listenForNewConnectionsTask, shutDownWaitTask });
             
-        }
-
-        private static void handleTcpClient(TcpClient tcpClient)
-        {
-            Console.WriteLine("\tSocket accepted. Processing further");
-            NetworkStream networkStream = tcpClient.GetStream();
-            //readSimpleString(networkStream);
-            readSocketCommandData(networkStream);
-
-            networkStream.Close();
-
-            tcpClient.Close();
-        }
-
-        private static void readSocketCommandData(NetworkStream networkStream)
-        {
-            ClientMessage socketCommand = ClientMessage.Deserialize(networkStream);
-
-            handleSocketCommand(socketCommand);
-        }
-
-        private static void handleSocketCommand(ClientMessage socketCommand)
-        {
-            switch (socketCommand.ClientMessageType)
-            {
-                case ClientMessageType.DisplayTextToConsole:
-                    displayTextToConsole(socketCommand as DisplayTextClientMessage);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        private static void displayTextToConsole(DisplayTextClientMessage displayTextSocketCommand)
-        {
-            Console.WriteLine(displayTextSocketCommand.DisplayText);
-        }
-
-        private static void readSimpleString(NetworkStream networkStream)
-        {
-            StreamReader reader = new StreamReader(networkStream);
-            StreamWriter writer = new StreamWriter(networkStream);
-            string line;
-            while (!string.IsNullOrEmpty(line = reader.ReadLine()))
-            {
-                Console.WriteLine("\t" + line);
-            }
         }
     }
 }

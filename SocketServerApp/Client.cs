@@ -16,9 +16,8 @@ namespace SocketServerApp
     {
         private TcpClient tcpClient;
         private IServerUINotifier _UINotifier;
-        private ConcurrentQueue<ServerMessage> _serverMessagesQueue = new ConcurrentQueue<ServerMessage>();
-        private Timer _serverMessagesQueueTimer;
         private Timer _keepAliveTimer;
+        private object _writeProcessLockObj = new object();
         private string _ID;
 
         public string ID { get => _ID; private set => _ID = value; }
@@ -35,16 +34,60 @@ namespace SocketServerApp
             initializeKeepAliveTimer();
             try
             {
-                Task readStreamTask = new Task((someTcpClientObj) => this.ReadStream(someTcpClientObj as TcpClient), tcpClient);
-                readStreamTask.Start();
-                Task writeStreamTask = new Task((someTcpClientObj) => this.WriteStream(someTcpClientObj as TcpClient), tcpClient);
-                writeStreamTask.Start();
-                //Task.Run(() => this.RandomlyQueueServerMessages());
+                ReadConnectionState connectionState = new ReadConnectionState(tcpClient);
+                tcpClient.Client.BeginReceive(connectionState.DataSizeBuffer, 0, connectionState.DataSizeBuffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), connectionState);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.GetType().ToString() + "\n" + ex.Message + "\n" + ex.StackTrace);
-                Console.ReadKey();
+                _UINotifier.LogException(ex, "unexpected exception during setting up the tcpClient");
+            }
+        }
+
+        private void ReceiveCallback(IAsyncResult ar)
+        {
+            ReadConnectionState connectionState = ar.AsyncState as ReadConnectionState;
+
+            try
+            {
+                int bytesReceived = connectionState.TcpClient.Client.EndReceive(ar);
+
+                if (bytesReceived != connectionState.DataSizeBuffer.Length)
+                {
+                    //Something went wrong, hence force disconnect the client
+                    throw new Exception("Data size partially received");
+                }
+                else
+                {
+                    int dataSize = BitConverter.ToInt32(connectionState.DataSizeBuffer, 0);
+
+                    if (dataSize <= 0)
+                    {
+                        //Something went wrong
+                        throw new Exception("Data size overflow/incorrect");
+                    }
+                    else
+                    {
+                        byte[] data = new byte[dataSize];
+                        connectionState.TcpClient.Client.Receive(data, 0, data.Length, SocketFlags.None);
+                        ClientMessage clientMessage = ClientMessage.Deserialize(data);
+
+                        handleClientMessage(clientMessage);//Look into possibilities to run it parallel away from this flow
+
+                        tcpClient.Client.BeginReceive(connectionState.DataSizeBuffer, 0, connectionState.DataSizeBuffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), connectionState);
+                    }
+                }
+            }
+            catch(SocketException sockEx)
+            {
+                _UINotifier.LogException(sockEx as Exception, "Unexpected SocketException during receiving data");
+                connectionState?.TcpClient?.Close();
+                ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(this));
+            }
+            catch (Exception ex)
+            {
+                _UINotifier.LogException(ex, "Unexpected exception during receiving data");
+                connectionState?.TcpClient?.Close();
+                ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(this));
             }
         }
 
@@ -63,7 +106,7 @@ namespace SocketServerApp
         private void _keepAliveTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             ServerMessage serverMessage = new KeepAliveServerMessage();
-            _serverMessagesQueue.Enqueue(serverMessage);
+            EnqueueServerMessage(serverMessage);
         }
 
         /// <summary>
@@ -75,127 +118,48 @@ namespace SocketServerApp
         {
             _keepAliveTimer?.Stop();
             _keepAliveTimer?.Dispose();
-            _serverMessagesQueueTimer?.Stop();
-            _serverMessagesQueueTimer?.Dispose();
-        }
-
-        private void RandomlyQueueServerMessages()
-        {
-            Random randGen = new Random(36);
-            if(_serverMessagesQueueTimer != null)
-            {
-                _serverMessagesQueueTimer.Stop();
-                _serverMessagesQueueTimer.Dispose();
-            }
-            _serverMessagesQueueTimer = new Timer(randGen.Next(3000, 6000));
-            _serverMessagesQueueTimer.Elapsed += Timer_Elapsed;
-            _serverMessagesQueueTimer.Start();
-        }
-
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            ServerMessage serverMessage = new DisplayTextServerMessage("Server says Now the time is " + DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
-            _serverMessagesQueue.Enqueue(serverMessage);
         }
 
         public void EnqueueServerMessage(ServerMessage serverMessage)
         {
-            _serverMessagesQueue.Enqueue(serverMessage);
+            lock (_writeProcessLockObj)
+            {
+                byte[] bufferData = serverMessage.Serialize(out int dataLength);
+                WriteConnectionState writeConnectionState = new WriteConnectionState(tcpClient, bufferData.Length);
+                tcpClient.Client.BeginSend(bufferData,0, bufferData.Length, SocketFlags.None, new AsyncCallback(SendCallback), writeConnectionState);
+            }
         }
 
-        private void WriteStream(TcpClient tcpClient)
+        private void SendCallback(IAsyncResult ar)
         {
-            while (true)
+            WriteConnectionState connectionState = ar.AsyncState as WriteConnectionState;
+
+            try
             {
-                if (!_serverMessagesQueue.IsEmpty)
+                int bytesSent = connectionState.TcpClient.Client.EndSend(ar, out SocketError socketError);
+
+                if(socketError != SocketError.Success)
                 {
-                    if (_serverMessagesQueue.TryDequeue(out ServerMessage serverMessage))
-                    {
-                        try
-                        {
-                            if (tcpClient.Connected)
-                            {
-                                NetworkStream networkStream = tcpClient.GetStream();
+                    throw new Exception(socketError.ToString());
+                }
 
-                                byte[] bufferData = serverMessage.Serialize(out int dataLength);
-
-                                networkStream.Write(bufferData, 0, dataLength);
-                                networkStream.Flush();
-                            }
-                            else
-                            {
-                                ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(this));
-                                break;
-                            }
-                        }
-                        catch (IOException ioEx)
-                        {
-                            ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(this));
-                            break;
-                        }
-                        catch (InvalidOperationException iopEx)
-                        {
-                            Console.WriteLine("Write process : Client had forcibly closed the connection before .. :(");
-                            Console.WriteLine("Message : " + iopEx.Message);
-                            ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(this));
-                            break;
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine(ex.GetType().ToString() + "\n" + ex.Message + "\n" + ex.StackTrace);
-                            break;
-                        }
-                    }
+                if(bytesSent != connectionState.SentDataLength)
+                {
+                    throw new Exception("Sent data doesn't match with the data length to be sent");
                 }
             }
-            Console.ReadKey();
-        }
-
-        private void ReadStream(TcpClient tcpClient)
-        {
-            
-
-            while (true)
+            catch (SocketException sockEx)
             {
-                try
-                {
-                    if (tcpClient.Connected)
-                    {
-                        NetworkStream networkStream = tcpClient.GetStream();
-
-                        if (networkStream.DataAvailable)
-                        {
-                            ClientMessage clientMessage = ClientMessage.Deserialize(networkStream);
-
-                            handleClientMessage(clientMessage);
-                        }
-                    }
-                    else
-                    {
-                        ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(this));
-                        break;
-                    }
-                }
-                catch (IOException ioEx)
-                {
-                    Console.WriteLine("IO exception during read process");
-                    ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(this));
-                    break;
-                }
-                catch (InvalidOperationException iopEx)
-                {
-                    Console.WriteLine("Read process : Client had forcibly closed the connection before .. :(");
-                    Console.WriteLine("Message : " + iopEx.Message);
-                    ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(this));
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.GetType().ToString() + "\n" + ex.Message + "\n" + ex.StackTrace);
-                    break;
-                }
+                _UINotifier.LogException(sockEx as Exception, "Unexpected SocketException during sending data");
+                connectionState?.TcpClient?.Close();
+                ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(this));
             }
-            Console.ReadKey();
+            catch (Exception ex)
+            {
+                _UINotifier.LogException(ex, "Unexpected exception during sending data");
+                connectionState?.TcpClient?.Close();
+                ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(this));
+            }
         }
 
         private void handleClientMessage(ClientMessage clientMessage)

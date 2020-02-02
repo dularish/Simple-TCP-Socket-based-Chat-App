@@ -46,6 +46,19 @@ namespace SocketServerWinService
             //Not logging
         }
 
+        public void LogException(Exception exception, string v)
+        {
+            eventLog1.WriteEntry("Exception!! : " + v + 
+                "\nException type : " + exception.GetType().FullName + 
+                "\nException message : " + exception.Message + 
+                "\nException stacktrace : " + exception.StackTrace, EventLogEntryType.Error);
+        }
+
+        public void LogText(string logMessage)
+        {
+            eventLog1.WriteEntry(logMessage);
+        }
+
         public void NotifyClientDisconnection(string clientDisconnectedID)
         {
             eventLog1.WriteEntry("Disconnecting client :" + clientDisconnectedID);
