@@ -21,7 +21,7 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_2EAEFF5A4632182D3CAA25568FD7C8F2"
+        "MsmKey" = "8:_2F983693CAB4551CBD4C43236767E7D3"
         "OwnerKey" = "8:_1CFAF78A6E524B8888FF3343EFE29DB5"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -33,38 +33,38 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_DC276F1CB85EA45120874B6A33BB0B31"
-        "OwnerKey" = "8:_2EAEFF5A4632182D3CAA25568FD7C8F2"
+        "MsmKey" = "8:_F38B9F3F4A0566C2F8ACF29DFB61F082"
+        "OwnerKey" = "8:_1CFAF78A6E524B8888FF3343EFE29DB5"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_DC276F1CB85EA45120874B6A33BB0B31"
+        "MsmKey" = "8:_F38B9F3F4A0566C2F8ACF29DFB61F082"
+        "OwnerKey" = "8:_2F983693CAB4551CBD4C43236767E7D3"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_1CFAF78A6E524B8888FF3343EFE29DB5"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_2F983693CAB4551CBD4C43236767E7D3"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_F38B9F3F4A0566C2F8ACF29DFB61F082"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_9C65E0508D96E014EA0B5CF68858B76B"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_1CFAF78A6E524B8888FF3343EFE29DB5"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_2EAEFF5A4632182D3CAA25568FD7C8F2"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_DC276F1CB85EA45120874B6A33BB0B31"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -85,6 +85,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
         "Release"
         {
@@ -101,6 +109,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
     }
     "Deployable"
@@ -130,14 +146,14 @@
         }
         "File"
         {
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_2EAEFF5A4632182D3CAA25568FD7C8F2"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_2F983693CAB4551CBD4C43236767E7D3"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:SimpleClientApp, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:SimpleClientApp, Version=1.0.7342.38521, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_2EAEFF5A4632182D3CAA25568FD7C8F2"
+                    "_2F983693CAB4551CBD4C43236767E7D3"
                     {
                     "Name" = "8:SimpleClientApp.dll"
                     "Attributes" = "3:512"
@@ -192,14 +208,14 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_DC276F1CB85EA45120874B6A33BB0B31"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_F38B9F3F4A0566C2F8ACF29DFB61F082"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:SocketFrm, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:SocketFrm, Version=1.0.7342.37419, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_DC276F1CB85EA45120874B6A33BB0B31"
+                    "_F38B9F3F4A0566C2F8ACF29DFB61F082"
                     {
                     "Name" = "8:SocketFrm.dll"
                     "Attributes" = "3:512"
@@ -279,8 +295,8 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Socket Chat Client"
-        "ProductCode" = "8:{9D9534C2-DC4D-4856-A12B-FE4639EB2E57}"
-        "PackageCode" = "8:{64AE9065-1889-4741-8411-6F47DA102914}"
+        "ProductCode" = "8:{9B4DB4E5-C15A-449D-AFA2-D4B3893982AB}"
+        "PackageCode" = "8:{0FF5958D-4F8D-47FC-986A-FBB980F51388}"
         "UpgradeCode" = "8:{53F6835D-085C-40F4-B033-6DEFBB772B59}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
