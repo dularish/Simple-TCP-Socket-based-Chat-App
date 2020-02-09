@@ -1,4 +1,5 @@
 ﻿using SocketFrm;
+using SocketFrm.ClientMessageTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,12 @@ namespace SocketServerApp
 
         public void HandleRegisterIDInServerMessage(RegisterIdClientMessage registerIdClientMessage)
         {
-            Console.WriteLine("User registered. " + registerIdClientMessage.ID);
+            Console.WriteLine("User registered. " + registerIdClientMessage.EmailId);
+        }
+
+        public void HandleSignInServerMessage(SignInClientMessage signInClientMessage)
+        {
+            Console.WriteLine("User signed in. " + signInClientMessage.EmailId);
         }
 
         public void HandleTransmitToPeerMessage(TransmitToPeerClientMessage transmitToPeerClientMessage)

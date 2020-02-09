@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SocketFrm.ServerMessageTypes;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,7 +12,7 @@ using System.Xml;
 
 namespace SocketFrm
 {
-    public enum ServerMessageType { DisplayTextToConsole, RegisterIdResult, ClientAvailabilityNotification, TransmitToPeerResult, TransmitToPeer, KeepAlive }
+    public enum ServerMessageType { DisplayTextToConsole, RegisterIdResult, ClientAvailabilityNotification, TransmitToPeerResult, TransmitToPeer, KeepAlive, SignInResult }
 
     [Serializable]
     [DataContract]
@@ -19,6 +20,7 @@ namespace SocketFrm
     [KnownType(typeof(RegisterIdResultServerMessage))]
     [KnownType(typeof(ClientAvailabilityNotificationServerMessage))]
     [KnownType(typeof(TransmitToPeerResultServerMessage))]
+    [KnownType(typeof(SignInResultServerMessage))]
     public abstract class ServerMessage
     {
         [DataMember]

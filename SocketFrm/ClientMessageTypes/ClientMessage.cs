@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SocketFrm.ClientMessageTypes;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,13 +12,14 @@ using System.Xml;
 
 namespace SocketFrm
 {
-    public enum ClientMessageType { DisplayTextToConsole, RegisterIDInServer, TransmitToPeer }
+    public enum ClientMessageType { DisplayTextToConsole, RegisterIDInServer, TransmitToPeer, SignIn }
 
     [Serializable]
     [DataContract]
     [KnownType(typeof(DisplayTextClientMessage))]
     [KnownType(typeof(RegisterIdClientMessage))]
     [KnownType(typeof(TransmitToPeerClientMessage))]
+    [KnownType(typeof(SignInClientMessage))]
     public abstract class ClientMessage
     {
         [DataMember]

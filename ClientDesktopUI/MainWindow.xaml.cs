@@ -1,6 +1,7 @@
 ﻿using ClientDesktopUI.ViewModels;
 using SimpleClientApp;
 using SocketFrm;
+using SocketFrm.ServerMessageTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +26,8 @@ namespace ClientDesktopUI
     public partial class MainWindow : Window, IClientUINotifier
     {
         private string _ClientRegistrationId;
-        private Action<string> _RegistrationService;
+        private Action<string, string> _RegistrationService;
+        private Action<string, string> _LoginService;
         private ManualResetEvent _ClientWantsShutdown = new ManualResetEvent(false);
         private IPeerMessageTransmitter _PeerMessageTransmitter;
         public PeersListViewModel PeersListViewModel = new PeersListViewModel();
@@ -35,7 +37,7 @@ namespace ClientDesktopUI
             DataContext = PeersListViewModel;
             try
             {
-                Task serverConnectionTask = ChatClientProgram.ConnectWithServer(this, out _RegistrationService);
+                Task serverConnectionTask = ChatClientProgram.ConnectWithServer(this, out _RegistrationService, out _LoginService);
             }
             catch (Exception ex)
             {
@@ -58,12 +60,17 @@ namespace ClientDesktopUI
 
         private void RequestRegistrationIdFromUser(string message = "")
         {
-            Action<string> onTryingToRegister = new Action<string>((someString) =>
+            Action<string, string> onTryingToRegister = new Action<string, string>((emailId, password) =>
             {
-                _ClientRegistrationId = someString;
-                _RegistrationService?.Invoke(someString);
+                _ClientRegistrationId = emailId;
+                _RegistrationService?.Invoke(emailId, password);
             });
-            ClientRegistrationWindow clientRegistrationWindow = new ClientRegistrationWindow(onTryingToRegister, message);
+            Action<string, string> onTryingToLogin = new Action<string, string>((emailId, password) =>
+            {
+                _ClientRegistrationId = emailId;
+                _LoginService?.Invoke(emailId, password);
+            });
+            ClientRegistrationWindow clientRegistrationWindow = new ClientRegistrationWindow(onTryingToRegister, onTryingToLogin, message);
             clientRegistrationWindow.Show();
         }
 
@@ -159,6 +166,22 @@ namespace ClientDesktopUI
             {
                 sendMessage();
             }
+        }
+
+        public void HandleSignInResultServerMessage(SignInResultServerMessage signInResultServerMessage, IPeerMessageTransmitter clientAppState)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                _PeerMessageTransmitter = clientAppState;
+                if (signInResultServerMessage.Result)
+                {
+                    MessageBox.Show("Login successful", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    RequestRegistrationIdFromUser("Invalid credentials entered. Please try different credentials");
+                }
+            });
         }
     }
 }

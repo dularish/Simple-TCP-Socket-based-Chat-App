@@ -7,10 +7,48 @@
         mc:Ignorable="d"
         Title="ClientRegistrationWindow" Height="250" Width="500" >
     <Grid Margin="20">
-        <StackPanel VerticalAlignment="Center">
-            <TextBlock Margin="0,20,0,20">Please enter your unique login Id that you would like to be identified with :</TextBlock>
-            <TextBox Margin="0,20,0,20" Name="_loginIdBox" />
-            <Button Margin="0,20,0,20" Name="_proceedBtn" Click="_proceedBtn_Click" Content="Proceed" />
-        </StackPanel>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Label Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center" Content="{Binding ValidationErrorMessage}" Foreground="Red" FontWeight="Bold" />
+        <TabControl Grid.Row="1">
+            <TabItem Header="Sign up">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Label VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="0" Grid.Column="0">Sign up email :</Label>
+                    <TextBox VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="0" Grid.Column="1" Name="_signupEmailBox" Width="200"></TextBox>
+                    <Label VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Grid.Column="0">Sign up password :</Label>
+                    <TextBox VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Grid.Column="1" Name="_signupPasswordBox" Width="200"></TextBox>
+                    <Button VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Name="_signupBtn" Click="_signupBtn_Click" Width="100" Height="30">Signup</Button>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Login">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Label VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="0" Grid.Column="0">Login email :</Label>
+                    <TextBox VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="0" Grid.Column="1" Name="_loginEmailBox" Width="200"></TextBox>
+                    <Label VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Grid.Column="0">Login password :</Label>
+                    <TextBox VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Grid.Column="1" Name="_loginPasswordBox" Width="200"></TextBox>
+                    <Button VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Width="100" Height="30" Name="_loginBtn" Click="_loginBtn_Click">Login</Button>
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>

@@ -1,4 +1,5 @@
 ﻿using SocketFrm;
+using SocketServerApp.Authentication;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,7 +27,8 @@ namespace SocketServerApp
         /// <returns></returns>
         public static Task StartTCPListener(IServerUINotifier serverUINotifier)
         {
-            ClientsManager clientsManager = new ClientsManager(serverUINotifier);
+            IAuthenticationService authenticationService = new FirebaseAuthService();
+            ClientsManager clientsManager = new ClientsManager(serverUINotifier, authenticationService);
             TcpListener tcpListener = new TcpListener(IPAddress.Any, 2060);
             tcpListener.Start();
 

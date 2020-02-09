@@ -12,14 +12,19 @@ namespace SocketFrm
     public class RegisterIdClientMessage : ClientMessage
     {
         [DataMember]
-        private string _ID;
+        private string _emailId;
 
-        public RegisterIdClientMessage(string id)
+        [DataMember]
+        private string _password;
+
+        public RegisterIdClientMessage(string emailId, string password)
         {
-            ID = id;
+            EmailId = emailId;
+            Password = password;
             ClientMessageType = ClientMessageType.RegisterIDInServer;
         }
 
-        public string ID { get => _ID; private set => _ID = value; }
+        public string EmailId { get => _emailId; private set => _emailId = value; }
+        public string Password { get => _password; private set => _password = value; }
     }
 }

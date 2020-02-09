@@ -27,25 +27,47 @@ namespace ClientDesktopUI
             set { SetValue(ValidationErrorMessageProperty, value); }
         }
 
-        private Action<string> _RegistrationService;
+        private Action<string, string> _RegistrationService;
+        private Action<string, string> _LoginService;
 
         // Using a DependencyProperty as the backing store for ValidationErrorMessage.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ValidationErrorMessageProperty =
             DependencyProperty.Register("ValidationErrorMessage", typeof(string), typeof(ClientRegistrationWindow), new PropertyMetadata(""));
 
 
-        public ClientRegistrationWindow(Action<string> registrationService, string validationErrorMessage = "")
+        public ClientRegistrationWindow(Action<string, string> signUpService, Action<string, string> loginService, string validationErrorMessage = "")
         {
             InitializeComponent();
             DataContext = this;
             ValidationErrorMessage = validationErrorMessage;
-            _RegistrationService = registrationService;
+            _RegistrationService = signUpService;
+            _LoginService = loginService;
         }
 
-        private void _proceedBtn_Click(object sender, RoutedEventArgs e)
+        private void _signupBtn_Click(object sender, RoutedEventArgs e)
         {
-            _RegistrationService?.Invoke(_loginIdBox.Text);
-            Close();
+            if(_signupEmailBox.Text.Length > 5 && _signupPasswordBox.Text.Length > 5)
+            {
+                _RegistrationService?.Invoke(_signupEmailBox.Text.Trim(), _signupPasswordBox.Text.Trim());
+                Close();
+            }
+            else
+            {
+                MessageBox.Show("Invalid entry to the text boxes");
+            }
+        }
+
+        private void _loginBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (_loginEmailBox.Text.Length > 5 && _loginPasswordBox.Text.Length > 5)
+            {
+                _LoginService?.Invoke(_loginEmailBox.Text.Trim(), _loginPasswordBox.Text.Trim());
+                Close();
+            }
+            else
+            {
+                MessageBox.Show("Invalid entry to the text boxes");
+            }
         }
     }
 }

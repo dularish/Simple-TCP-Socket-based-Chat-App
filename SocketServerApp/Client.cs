@@ -1,4 +1,5 @@
 ﻿using SocketFrm;
+using SocketFrm.ClientMessageTypes;
 using SocketFrm.ServerMessageTypes;
 using System;
 using System.Collections.Concurrent;
@@ -24,6 +25,7 @@ namespace SocketServerApp
 
         public event EventHandler<ClientDisconnectedEventArgs> ClientDisconnected;
         public event EventHandler<ClientRegisterRequestEventArgs> ClientRegisterRequested;
+        public event EventHandler<ClientSignInRequestEventArgs> ClientSignInRequested;
         public event EventHandler<ClientTransmittedPeerMessageEventArgs> ClientTransmittedPeerMessage;
 
         public Client(TcpClient tcpClient, IServerUINotifier uiNotifier)
@@ -41,6 +43,12 @@ namespace SocketServerApp
             {
                 _UINotifier.LogException(ex, "unexpected exception during setting up the tcpClient");
             }
+        }
+
+        internal void ForceDisconnect()
+        {
+            this.tcpClient?.Close();
+            ClientDisconnected?.Invoke(this, new ClientDisconnectedEventArgs(this));
         }
 
         private void ReceiveCallback(IAsyncResult ar)
@@ -171,9 +179,15 @@ namespace SocketServerApp
                     break;
                 case ClientMessageType.RegisterIDInServer:
                     RegisterIdClientMessage registerIdClientMessage = clientMessage as RegisterIdClientMessage;
-                    ID = registerIdClientMessage.ID;
-                    ClientRegisterRequested?.Invoke(this, new ClientRegisterRequestEventArgs(registerIdClientMessage.ID, this));
+                    ID = registerIdClientMessage.EmailId;
+                    ClientRegisterRequested?.Invoke(this, new ClientRegisterRequestEventArgs(registerIdClientMessage.EmailId, registerIdClientMessage.Password, this));
                     _UINotifier.HandleRegisterIDInServerMessage(registerIdClientMessage);
+                    break;
+                case ClientMessageType.SignIn:
+                    SignInClientMessage signInClientMessage = clientMessage as SignInClientMessage;
+                    ID = signInClientMessage.EmailId;
+                    ClientSignInRequested?.Invoke(this, new ClientSignInRequestEventArgs(signInClientMessage.EmailId, signInClientMessage.Password, this));
+                    _UINotifier.HandleSignInServerMessage(signInClientMessage);
                     break;
                 case ClientMessageType.TransmitToPeer:
                     TransmitToPeerClientMessage transmitToPeerClientMessage = clientMessage as TransmitToPeerClientMessage;
@@ -200,17 +214,42 @@ namespace SocketServerApp
 
     public class ClientRegisterRequestEventArgs : EventArgs
     {
-        private string _ID;
+        private readonly string _userEmail;
+        private readonly string _password;
         private Client _Client;
 
-        public ClientRegisterRequestEventArgs(string id, Client client)
+        public ClientRegisterRequestEventArgs(string userEmail, string password, Client client)
         {
-            ID = id;
+            this._userEmail = userEmail;
+            this._password = password;
             Client = client;
         }
 
-        public string ID { get => _ID; private set => _ID = value; }
         public Client Client { get => _Client; private set => _Client = value; }
+
+        public string UserEmail => _userEmail;
+
+        public string Password => _password;
+    }
+
+    public class ClientSignInRequestEventArgs : EventArgs
+    {
+        private readonly string _userEmail;
+        private readonly string _password;
+        private readonly Client _client;
+
+        public ClientSignInRequestEventArgs(string userEmail, string password, Client client)
+        {
+            this._userEmail = userEmail;
+            this._password = password;
+            this._client = client;
+        }
+
+        public string UserEmail => _userEmail;
+
+        public string Password => _password;
+
+        public Client Client => _client;
     }
 
     public class ClientDisconnectedEventArgs : EventArgs

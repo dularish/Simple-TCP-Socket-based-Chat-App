@@ -1,4 +1,5 @@
 ﻿using SocketFrm;
+using SocketFrm.ClientMessageTypes;
 using SocketServerApp;
 using System;
 using System.Collections.Generic;
@@ -38,7 +39,12 @@ namespace SocketServerWinService
 
         public void HandleRegisterIDInServerMessage(RegisterIdClientMessage registerIdClientMessage)
         {
-            eventLog1.WriteEntry("Handling registering of client with ID:" + registerIdClientMessage.ID);
+            eventLog1.WriteEntry("Handling registering of client with ID:" + registerIdClientMessage.EmailId);
+        }
+
+        public void HandleSignInServerMessage(SignInClientMessage signInClientMessage)
+        {
+            eventLog1.WriteEntry("Handling signing in of client with ID:" + signInClientMessage.EmailId);
         }
 
         public void HandleTransmitToPeerMessage(TransmitToPeerClientMessage transmitToPeerClientMessage)

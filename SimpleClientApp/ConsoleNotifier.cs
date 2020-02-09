@@ -1,4 +1,5 @@
 ﻿using SocketFrm;
+using SocketFrm.ServerMessageTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,9 @@ namespace SimpleClientApp
         private string _clientId = "Unnamed";
         private ManualResetEvent _clientWantsShutdown = new ManualResetEvent(false);
 
-        internal Action<string> RegistrationService { get; set; }
+        internal Action<string, string> RegistrationService { get; set; }
+
+        internal Action<string, string> LoginService { get; set; }
         public List<string> AvailableUsers { get => _availableUsers; set => _availableUsers = value; }
         public string ClientId { get => _clientId; set => _clientId = value; }
 
@@ -134,10 +137,28 @@ namespace SimpleClientApp
 
         public void RequestRegistrationIdFromUser()
         {
-            Console.WriteLine("Enter the loginId that you would like to identify yourself with");
+            Console.WriteLine("Enter your emailId");
             string registrationId = Console.ReadLine();
+            Console.WriteLine("Enter the password");
+            string password = Console.ReadLine();
             ClientId = registrationId;
-            RegistrationService?.Invoke(registrationId);
+            RegistrationService?.Invoke(registrationId, password);
+        }
+
+        public void HandleSignInResultServerMessage(SignInResultServerMessage signInResultServerMessage, IPeerMessageTransmitter peerMessageTransmitter)
+        {
+            if (signInResultServerMessage.Result)
+            {
+                Console.WriteLine("Login successful!! ");
+                Task.Run(() => { startListeningToUI(peerMessageTransmitter); });
+            }
+            else
+            {
+                Console.WriteLine("Login failed. Please try another ID");
+
+                ClientId = string.Empty;
+                RequestRegistrationIdFromUser();
+            }
         }
     }
 }

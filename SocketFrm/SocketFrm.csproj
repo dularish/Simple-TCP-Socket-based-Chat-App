@@ -12,6 +12,7 @@
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>false</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -44,6 +45,7 @@
   <ItemGroup>
     <Compile Include="ClientMessageTypes\DisplayTextClientMessage.cs" />
     <Compile Include="ClientMessageTypes\ClientMessage.cs" />
+    <Compile Include="ClientMessageTypes\SignInClientMessage.cs" />
     <Compile Include="ServerMessageTypes\DisplayTextServerMessage.cs" />
     <Compile Include="IClientUINotifier.cs" />
     <Compile Include="IPeerMessageTransmitter.cs" />
@@ -55,6 +57,7 @@
     <Compile Include="ServerMessageTypes\ClientAvailabilityNotificationServerMessage.cs" />
     <Compile Include="ServerMessageTypes\ServerMessage.cs" />
     <Compile Include="ClientMessageTypes\TransmitToPeerClientMessage.cs" />
+    <Compile Include="ServerMessageTypes\SignInResultServerMessage.cs" />
     <Compile Include="ServerMessageTypes\TransmitToPeerResultServerMessage.cs" />
     <Compile Include="ServerMessageTypes\TransmitToPeerServerMessage.cs" />
   </ItemGroup>

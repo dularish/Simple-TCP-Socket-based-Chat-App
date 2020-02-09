@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using SocketFrm.ClientMessageTypes;
 
 namespace SocketFrm
 {
@@ -17,5 +18,6 @@ namespace SocketFrm
         void NotifyClientDisconnection(string clientDisconnectedID);
         void LogException(Exception exception, string exceptionMessage);
         void LogText(string logMessage);
+        void HandleSignInServerMessage(SignInClientMessage signInClientMessage);
     }
 }

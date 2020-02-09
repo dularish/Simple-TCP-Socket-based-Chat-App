@@ -10,19 +10,21 @@ using SocketFrm;
 using System.Collections.Concurrent;
 using System.Timers;
 using System.Configuration;
+using SocketFrm.ClientMessageTypes;
+using SocketFrm.ServerMessageTypes;
 
 namespace SimpleClientApp
 {
     public class ChatClientProgram
     {
-        private static bool _isRegistrationInProcess = false;
+        private static bool _isAuthenticationInProcess = false;
         private static ClientAppState _clientAppState;
         static void Main(string[] args)
         {
             ConsoleNotifier clientUINotifier = new ConsoleNotifier();
-            Action<string> registrationService;
-            Task serverConnectionTask = ConnectWithServer(clientUINotifier, out registrationService);
+            Task serverConnectionTask = ConnectWithServer(clientUINotifier, out Action<string,string> registrationService, out Action<string,string> loginService);
             clientUINotifier.RegistrationService = registrationService;
+            clientUINotifier.LoginService = loginService;
             clientUINotifier.RequestRegistrationIdFromUser();
             serverConnectionTask.Wait();
         }
@@ -30,7 +32,7 @@ namespace SimpleClientApp
         /// Task that can be waited till the termination of connection
         /// </summary>
         /// <param name="clientAppState"></param>
-        public static Task ConnectWithServer(IClientUINotifier clientUINotifier, out Action<string> registrationService)
+        public static Task ConnectWithServer(IClientUINotifier clientUINotifier, out Action<string,string> signupService, out Action<string,string> loginService)
         {
             ClientAppState clientAppState = new ClientAppState();
             IPAddress serverIP = IPAddress.Parse(ConfigurationManager.AppSettings["ServerIP"]);
@@ -45,7 +47,8 @@ namespace SimpleClientApp
             Task shutDownWaitTask = new Task(() => clientUINotifier.ClientWantsShutdown.WaitOne());
             shutDownWaitTask.Start();
             _clientAppState = clientAppState;
-            registrationService = submitRegistrationRequest;
+            signupService = submitRegistrationRequest;
+            loginService = submitLoginRequest;
             return Task.WhenAny(new List<Task>() { readStreamTask, writeStreamTask, shutDownWaitTask })
                 .ContinueWith(x => 
                     {
@@ -55,14 +58,14 @@ namespace SimpleClientApp
             
         }
 
-        private static void submitRegistrationRequest(string registrationId)
+        private static void submitRegistrationRequest(string emailId, string password)
         {
-            if (!_isRegistrationInProcess)
+            if (!_isAuthenticationInProcess)
             {
-                if(registrationId.Length > 4)
+                if(emailId.Length > 4)
                 {
-                    _clientAppState?.ClientMessagesQueue.Enqueue(new RegisterIdClientMessage(registrationId));
-                    _isRegistrationInProcess = true;
+                    _clientAppState?.ClientMessagesQueue.Enqueue(new RegisterIdClientMessage(emailId, password));
+                    _isAuthenticationInProcess = true;
                 }
                 else
                 {
@@ -71,7 +74,27 @@ namespace SimpleClientApp
             }
             else
             {
-                throw new Exception("Registration request already submitted");
+                throw new Exception("Authentication in process");
+            }
+        }
+
+        private static void submitLoginRequest(string emailId, string password)
+        {
+            if (!_isAuthenticationInProcess)
+            {
+                if (emailId.Length > 4)
+                {
+                    _clientAppState?.ClientMessagesQueue.Enqueue(new SignInClientMessage(emailId, password));
+                    _isAuthenticationInProcess = true;
+                }
+                else
+                {
+                    throw new Exception("Emaild Id is too short");
+                }
+            }
+            else
+            {
+                throw new Exception("Authentication in process");
             }
         }
 
@@ -122,7 +145,6 @@ namespace SimpleClientApp
                     }
                 }
             }
-            Console.ReadKey();
         }
 
         private static void readStream(ClientAppState clientAppState, IClientUINotifier clientUINotifier)
@@ -182,7 +204,18 @@ namespace SimpleClientApp
                     }
                     finally
                     {
-                        _isRegistrationInProcess = false;
+                        _isAuthenticationInProcess = false;
+                    }
+                    break;
+                case ServerMessageType.SignInResult:
+                    try
+                    {
+                        IPeerMessageTransmitter peerMessageTransmitter = (serverMessage as RegisterIdResultServerMessage)?.Result ?? false ? clientAppState : null;
+                        clientUINotifier.HandleSignInResultServerMessage(serverMessage as SignInResultServerMessage, peerMessageTransmitter);
+                    }
+                    finally
+                    {
+                        _isAuthenticationInProcess = false;
                     }
                     break;
                 case ServerMessageType.ClientAvailabilityNotification:
