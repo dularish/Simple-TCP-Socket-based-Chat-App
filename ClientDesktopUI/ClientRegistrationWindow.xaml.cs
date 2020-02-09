@@ -42,13 +42,25 @@ namespace ClientDesktopUI
             ValidationErrorMessage = validationErrorMessage;
             _RegistrationService = signUpService;
             _LoginService = loginService;
+            _loginEmailBox.Text = Properties.Settings.Default.Email;
+            _loginPasswordBox.Password = Properties.Settings.Default.Password;
         }
 
         private void _signupBtn_Click(object sender, RoutedEventArgs e)
         {
-            if(_signupEmailBox.Text.Length > 5 && _signupPasswordBox.Text.Length > 5)
+            if(_signupEmailBox.Text.Length > 5 && _signupPasswordBox.Password.Length > 5)
             {
-                _RegistrationService?.Invoke(_signupEmailBox.Text.Trim(), _signupPasswordBox.Text.Trim());
+                _RegistrationService?.Invoke(_signupEmailBox.Text.Trim(), _signupPasswordBox.Password.Trim());
+                if (_signupRememberMe.IsChecked ?? false)
+                {
+                    Properties.Settings.Default.Email = _signupEmailBox.Text.Trim();
+                    Properties.Settings.Default.Password = _signupPasswordBox.Password.Trim();
+                }
+                else
+                {
+                    Properties.Settings.Default.Email = string.Empty;
+                    Properties.Settings.Default.Password = string.Empty;
+                }
                 Close();
             }
             else
@@ -59,9 +71,19 @@ namespace ClientDesktopUI
 
         private void _loginBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (_loginEmailBox.Text.Length > 5 && _loginPasswordBox.Text.Length > 5)
+            if (_loginEmailBox.Text.Length > 5 && _loginPasswordBox.Password.Length > 5)
             {
-                _LoginService?.Invoke(_loginEmailBox.Text.Trim(), _loginPasswordBox.Text.Trim());
+                _LoginService?.Invoke(_loginEmailBox.Text.Trim(), _loginPasswordBox.Password.Trim());
+                if (_loginRememberMe.IsChecked ?? false)
+                {
+                    Properties.Settings.Default.Email = _loginEmailBox.Text.Trim();
+                    Properties.Settings.Default.Password = _loginPasswordBox.Password.Trim();
+                }
+                else
+                {
+                    Properties.Settings.Default.Email = string.Empty;
+                    Properties.Settings.Default.Password = string.Empty;
+                }
                 Close();
             }
             else

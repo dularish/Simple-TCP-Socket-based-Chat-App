@@ -210,7 +210,7 @@ namespace SimpleClientApp
                 case ServerMessageType.SignInResult:
                     try
                     {
-                        IPeerMessageTransmitter peerMessageTransmitter = (serverMessage as RegisterIdResultServerMessage)?.Result ?? false ? clientAppState : null;
+                        IPeerMessageTransmitter peerMessageTransmitter = (serverMessage as SignInResultServerMessage)?.Result ?? false ? clientAppState : null;
                         clientUINotifier.HandleSignInResultServerMessage(serverMessage as SignInResultServerMessage, peerMessageTransmitter);
                     }
                     finally

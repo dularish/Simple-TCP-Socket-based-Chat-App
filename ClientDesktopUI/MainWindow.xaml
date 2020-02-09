@@ -7,7 +7,7 @@
         xmlns:vm="clr-namespace:ClientDesktopUI.ViewModels"
         xmlns:converters="clr-namespace:ClientDesktopUI.Converters"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Chat Window" Height="450" Width="800">
     <Window.Resources>
         <converters:ListViewSelItemToBooleanConverter x:Key="ListViewSelItemToBoolConv" />
     </Window.Resources>

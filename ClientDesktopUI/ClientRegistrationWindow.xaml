@@ -13,27 +13,10 @@
         </Grid.RowDefinitions>
         <Label Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center" Content="{Binding ValidationErrorMessage}" Foreground="Red" FontWeight="Bold" />
         <TabControl Grid.Row="1">
-            <TabItem Header="Sign up">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <Label VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="0" Grid.Column="0">Sign up email :</Label>
-                    <TextBox VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="0" Grid.Column="1" Name="_signupEmailBox" Width="200"></TextBox>
-                    <Label VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Grid.Column="0">Sign up password :</Label>
-                    <TextBox VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Grid.Column="1" Name="_signupPasswordBox" Width="200"></TextBox>
-                    <Button VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Name="_signupBtn" Click="_signupBtn_Click" Width="100" Height="30">Signup</Button>
-                </Grid>
-            </TabItem>
             <TabItem Header="Login">
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition />
                         <RowDefinition />
                         <RowDefinition />
                         <RowDefinition />
@@ -45,8 +28,29 @@
                     <Label VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="0" Grid.Column="0">Login email :</Label>
                     <TextBox VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="0" Grid.Column="1" Name="_loginEmailBox" Width="200"></TextBox>
                     <Label VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Grid.Column="0">Login password :</Label>
-                    <TextBox VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Grid.Column="1" Name="_loginPasswordBox" Width="200"></TextBox>
+                    <PasswordBox VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Grid.Column="1" Name="_loginPasswordBox" Width="200"></PasswordBox>
                     <Button VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Width="100" Height="30" Name="_loginBtn" Click="_loginBtn_Click">Login</Button>
+                    <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Name="_loginRememberMe" IsChecked="True">Remember me</CheckBox>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Sign up">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Label VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="0" Grid.Column="0">Sign up email :</Label>
+                    <TextBox VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="0" Grid.Column="1" Name="_signupEmailBox" Width="200"></TextBox>
+                    <Label VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Grid.Column="0">Sign up password :</Label>
+                    <PasswordBox VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" Grid.Column="1" Name="_signupPasswordBox" Width="200"></PasswordBox>
+                    <Button VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Name="_signupBtn" Click="_signupBtn_Click" Width="100" Height="30">Signup</Button>
+                    <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Name="_signupRememberMe" IsChecked="True">Remember me</CheckBox>
                 </Grid>
             </TabItem>
         </TabControl>

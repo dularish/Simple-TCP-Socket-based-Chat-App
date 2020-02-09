@@ -51,6 +51,7 @@ namespace ClientDesktopUI
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             ClientWantsShutdown.Set();
+            Properties.Settings.Default.Save();
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -87,6 +88,11 @@ namespace ClientDesktopUI
                 else
                 {
                     PeersListViewModel.MakeUserNonAvailable(clientAvailabilityNotificationServerMessage.ClientUniqueId);
+                }
+
+                if(_PeersList.SelectedIndex == -1 && _PeersList.Items.Count > 0)
+                {
+                    _PeersList.SelectedIndex = 0;
                 }
             });
         }
