@@ -27,7 +27,7 @@ namespace SocketServerApp
         /// <returns></returns>
         public static Task StartTCPListener(IServerUINotifier serverUINotifier)
         {
-            IAuthenticationService authenticationService = new FirebaseAuthService();
+            IAuthenticationService authenticationService = new SimplestAuthService();
             ClientsManager clientsManager = new ClientsManager(serverUINotifier, authenticationService);
             TcpListener tcpListener = new TcpListener(IPAddress.Any, 2060);
             tcpListener.Start();
