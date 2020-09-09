@@ -1,6 +1,9 @@
 # SocketApps
 Simple chat application for learning to build TCP/IP socket based applications
 
+## Demo
+  ![Demo Gif](DemoGifs/DemoT2_1in8_scaleBy4.gif)
+
 ## Setup instructions :
 
 ### Server setup :
