@@ -14,7 +14,7 @@ namespace ClientDesktopUI.ViewModels
         private string _PeerName;
         private bool _IsAvailable;
 
-        private ObservableCollection<string> _ChatMessages = new ObservableCollection<string>();
+        private ObservableCollection<ChatMessageViewModel> _ChatMessages = new ObservableCollection<ChatMessageViewModel>();
 
         public string PeerName
         {
@@ -25,7 +25,7 @@ namespace ClientDesktopUI.ViewModels
             }
         }
 
-        public ObservableCollection<string> ChatMessages
+        public ObservableCollection<ChatMessageViewModel> ChatMessages
         {
             get => _ChatMessages; set
             {

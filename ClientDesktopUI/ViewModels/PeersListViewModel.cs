@@ -60,7 +60,7 @@ namespace ClientDesktopUI.ViewModels
         {
             if (_PeerDict.ContainsKey(registrationId))
             {
-                _PeerDict[registrationId].ChatMessages.Add((messageFrom == MessageFrom.Me ? "Me : " : registrationId + " : ") + message);
+                _PeerDict[registrationId].ChatMessages.Add(new ChatMessageViewModel((messageFrom == MessageFrom.Me ? "Me : " : registrationId + " : ") + message));
             }
             else
             {

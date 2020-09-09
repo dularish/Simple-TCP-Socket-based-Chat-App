@@ -56,6 +56,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Converters\ListViewSelItemToBooleanConverter.cs" />
+    <Compile Include="ViewModels\ChatMessageViewModel.cs" />
     <Compile Include="ViewModels\PeerDataViewModel.cs" />
     <Compile Include="ViewModels\PeersListViewModel.cs" />
     <Compile Include="WindowsHelper.cs" />
