@@ -11,6 +11,8 @@ namespace SocketServerApp.Authentication
         bool SignIn(string userEmail, string password, out SignInErrorCode signInErrorCode);
 
         bool SignUp(string userEmail, string password, out SignUpErrorCode signUpErrorCode);
+
+        string Name { get; }
     }
 
     public enum SignInErrorCode { NoError, InvalidCredentials, UnknownError }

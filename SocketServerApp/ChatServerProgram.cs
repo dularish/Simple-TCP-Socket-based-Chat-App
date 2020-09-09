@@ -28,6 +28,7 @@ namespace SocketServerApp
         public static Task StartTCPListener(IServerUINotifier serverUINotifier)
         {
             IAuthenticationService authenticationService = new FirebaseAuthService();
+            serverUINotifier.LogText("Initialized authentication service : " + authenticationService.Name);
             ClientsManager clientsManager = new ClientsManager(serverUINotifier, authenticationService);
             TcpListener tcpListener = new TcpListener(IPAddress.Any, 2060);
             tcpListener.Start();

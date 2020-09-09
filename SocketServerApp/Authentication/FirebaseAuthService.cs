@@ -15,6 +15,9 @@ namespace SocketServerApp.Authentication
         {
             _firebaseAuthProvider =  new FirebaseAuthProvider(new FirebaseConfig(Environment.GetEnvironmentVariable("ChatServerFirebaseApiKey", EnvironmentVariableTarget.Machine)));
         }
+
+        public string Name => "Firebase Authentication service";
+
         public bool SignIn(string userEmail, string password, out SignInErrorCode signInErrorCode)
         {
             bool retCode = true;

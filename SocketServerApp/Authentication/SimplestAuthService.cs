@@ -9,6 +9,9 @@ namespace SocketServerApp.Authentication
     public class SimplestAuthService : IAuthenticationService
     {
         private Dictionary<string, string> _creds = new Dictionary<string, string>();
+
+        public string Name => "Simple to test service session based authentication service";
+
         public bool SignIn(string userEmail, string password, out SignInErrorCode signInErrorCode)
         {
             if(_creds.ContainsKey(userEmail) && _creds[userEmail] == password)
